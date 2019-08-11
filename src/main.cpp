@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
-
+#include <string>
+#include <fstream>
+using namespace std;
 
 const char *vertexSource = "#version 330\n\
 in  vec3 in_pos;\n\
@@ -123,7 +125,7 @@ int main(int argc, char** argv)
 //  printCompileStatus("Vertex shader", vertexShader);
 
   GLuint fragmentShader;
-  loadShader("src/shaders/shader_vertex_tex.glsl", fragmentShader, GL_FRAGMENT_SHADER);
+  loadShader("src/shaders/shader_fragment_tex.glsl", fragmentShader, GL_FRAGMENT_SHADER);
 //  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 //  glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
 //  glCompileShader(fragmentShader);
