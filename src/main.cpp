@@ -4,40 +4,43 @@
 #include <GL/glut.h>
 #include <string>
 #include <fstream>
+#include "../include/shape.h"
 using namespace std;
 
-const char *vertexSource = "#version 330\n\
-in  vec3 in_pos;\n\
-in  vec2 in_UV;\n\
-in  vec4 in_col;\n\
-out vec2 ex_UV;\n\
-out vec4 ex_col;\n\
-void main()\n\
-{\n\
-  gl_Position = vec4(in_pos,1);\n\
-  ex_UV = in_UV;\n\
-  ex_col = in_col;\n\
-}";
+Shape * s;
+
+//const char *vertexSource = "#version 330\n\
+//in  vec3 in_pos;\n\
+//in  vec2 in_UV;\n\
+//in  vec4 in_col;\n\
+//out vec2 ex_UV;\n\
+//out vec4 ex_col;\n\
+//void main()\n\
+//{\n\
+//  gl_Position = vec4(in_pos,1);\n\
+//  ex_UV = in_UV;\n\
+//  ex_col = in_col;\n\
+//}";
 
 
-const char *fragmentSource = "#version 330\n\
-in  vec2 ex_UV;\n\
-in  vec4 ex_col;\n\
-out vec4 outColor;\n\
-uniform sampler2D tex;\n\
-void main()\n\
-{\n\
-  outColor = texture(tex, ex_UV);\n\
-}";
+//const char *fragmentSource = "#version 330\n\
+//in  vec2 ex_UV;\n\
+//in  vec4 ex_col;\n\
+//out vec4 outColor;\n\
+//uniform sampler2D tex;\n\
+//void main()\n\
+//{\n\
+//  outColor = texture(tex, ex_UV);\n\
+//}";
 
 
 GLuint vao;
-GLuint vbo;
-GLuint cbo;
-GLuint tbo;
-GLuint ebo;
-GLuint tex;
-GLuint program;
+//GLuint vbo;
+//GLuint cbo;
+//GLuint tbo;
+//GLuint ebo;
+//GLuint tex;
+//GLuint program;
 int width = 320;
 int height = 240;
 
@@ -45,8 +48,12 @@ void onDisplay(void)
 {
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  glUseProgram(program);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+//  ~~ Shape::render()
+//  glUseProgram(program);
+//  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+//  ~~~
+	s->render();
+  
   glutSwapBuffers();
 }
 
@@ -56,52 +63,53 @@ void onResize(int w, int h)
   glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
-void printError(const char *context)
-{
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR) {
-    fprintf(stderr, "%s: %s\n", context, gluErrorString(error));
-  };
-}
+//void printError(const char *context)
+//{
+//  GLenum error = glGetError();
+//  if (error != GL_NO_ERROR) {
+//    fprintf(stderr, "%s: %s\n", context, gluErrorString(error));
+//  };
+//}
 
-void printStatus(const char *step, GLuint context, GLuint status)
-{
-  GLint result = GL_FALSE;
-  glGetShaderiv(context, status, &result);
-  if (result == GL_FALSE) {
-    char buffer[1024];
-    if (status == GL_COMPILE_STATUS)
-      glGetShaderInfoLog(context, 1024, NULL, buffer);
-    else
-      glGetProgramInfoLog(context, 1024, NULL, buffer);
-    if (buffer[0])
-      fprintf(stderr, "%s: %s\n", step, buffer);
-  };
-}
+//void printStatus(const char *step, GLuint context, GLuint status)
+//{
+//  GLint result = GL_FALSE;
+//  glGetShaderiv(context, status, &result);
+//  if (result == GL_FALSE) {
+//    char buffer[1024];
+//    if (status == GL_COMPILE_STATUS)
+//      glGetShaderInfoLog(context, 1024, NULL, buffer);
+//    else
+//      glGetProgramInfoLog(context, 1024, NULL, buffer);
+//    if (buffer[0])
+//      fprintf(stderr, "%s: %s\n", step, buffer);
+//  };
+//}
 
-void printCompileStatus(const char *step, GLuint context)
-{
-  printStatus(step, context, GL_COMPILE_STATUS);
-}
+//void printCompileStatus(const char *step, GLuint context)
+//{
+//  printStatus(step, context, GL_COMPILE_STATUS);
+//}
 
-void printLinkStatus(const char *step, GLuint context)
-{
-  printStatus(step, context, GL_LINK_STATUS);
-}
+//void printLinkStatus(const char *step, GLuint context)
+//{
+//  printStatus(step, context, GL_LINK_STATUS);
+//}
 
 
-void loadShader(string filename, GLuint &shader_id, GLenum shader_type){
+//GLuint loadShader(string filename, GLenum shader_type){
 
-	ifstream fin(filename.c_str());
-	string c((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
-	const char * glsl_src = c.c_str();
+//	ifstream fin(filename.c_str());
+//	string c((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+//	const char * glsl_src = c.c_str();
 
-	shader_id = glCreateShader(shader_type);
-	glShaderSource(shader_id, 1, &glsl_src, NULL);
-	glCompileShader(shader_id);
-	printStatus(filename.c_str(), shader_id, GL_COMPILE_STATUS);
-	
-}
+//	GLuint shader_id = glCreateShader(shader_type);
+//	glShaderSource(shader_id, 1, &glsl_src, NULL);
+//	glCompileShader(shader_id);
+//	printStatus(filename.c_str(), shader_id, GL_COMPILE_STATUS);
+//	
+//	return shader_id;
+//}
 
 
 
@@ -117,25 +125,6 @@ int main(int argc, char** argv)
   glewExperimental = GL_TRUE;
   glewInit();
 
-  GLuint vertexShader;
-  loadShader("src/shaders/shader_vertex_tex.glsl", vertexShader, GL_VERTEX_SHADER);
-//   = glCreateShader(GL_VERTEX_SHADER);
-//  glShaderSource(vertexShader, 1, &vertexSource, NULL);
-//  glCompileShader(vertexShader);
-//  printCompileStatus("Vertex shader", vertexShader);
-
-  GLuint fragmentShader;
-  loadShader("src/shaders/shader_fragment_tex.glsl", fragmentShader, GL_FRAGMENT_SHADER);
-//  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-//  glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
-//  glCompileShader(fragmentShader);
-//  printCompileStatus("Fragment shader", fragmentShader);
-
-  program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, fragmentShader);
-  glLinkProgram(program);
-  printLinkStatus("Shader program", program);
 
   // BUFFERS etc
 
@@ -148,20 +137,6 @@ int main(int argc, char** argv)
 	  -0.5f, -0.5f,  0.0f,
 	   0.5f, -0.5f,  0.0f
 	};
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	float cols[] = {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1};
-	glGenBuffers(1, &cbo);
-	glBindBuffer(GL_ARRAY_BUFFER, cbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), cols, GL_STATIC_DRAW);
-
-	unsigned int indices[] = { 0, 1, 2, 2,3,0 };
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 
 	// texture setup
 	GLfloat UVs[] = {
@@ -170,40 +145,83 @@ int main(int argc, char** argv)
 	   0.0f, 0.0f,
 	   1.0f, 0.0f
 	};
-	glGenBuffers(1, &tbo);	// use a separate array buffer to store UVs
-	glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(UVs), UVs, GL_STATIC_DRAW);
 
+	float cols[] = {1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1};
+	int indices[] = { 0, 1, 2, 2,3,0 };
 	unsigned char pixels2[] = {
 	  0, 0,255,0, 	0, 255, 0,0,
 	  255,0,0,0,    255,255,255,0
 	};
-  glGenTextures(1, &tex);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glUniform1i(glGetUniformLocation(program, "tex"), 0);
-//  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels2); // After reading one row of texels, pointer advances to next 4 byte boundary. Therefore ALWAYS use 4byte colour types. 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glGenerateMipmap(GL_TEXTURE_2D);
 
+	int nVertices = 4;
+	int nelements = 6;
 
-	// drawing
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer(glGetAttribLocation(program, "in_pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+//  ~~ Shape()
+//	GLuint vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
+//	GLuint fragmentShader = loadShader("src/shaders/shader_fragment_tex.glsl", GL_FRAGMENT_SHADER);
 
-  glBindBuffer(GL_ARRAY_BUFFER, cbo);
-  glVertexAttribPointer(glGetAttribLocation(program, "in_col"), 4, GL_FLOAT, GL_FALSE, 0, 0);
+//	program = glCreateProgram();
+//	glAttachShader(program, vertexShader);
+//	glAttachShader(program, fragmentShader);
+//	glLinkProgram(program);
+//	printLinkStatus("Shader program", program);
+//	
+//	glGenBuffers(1, &vbo);
+//	glGenBuffers(1, &cbo);
+//	glGenBuffers(1, &ebo);
+//	glGenBuffers(1, &tbo);	// use a separate array buffer to store UVs
+//  ~~~
+	s = new Shape(4,3);
+	
+//  ~~ Shape::setVertices()
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//	glBufferData(GL_ARRAY_BUFFER, 3*nVertices*sizeof(float), vertices, GL_STATIC_DRAW);
+//  ~~~
+	s->setVertices(vertices);
 
-  glBindBuffer(GL_ARRAY_BUFFER, tbo);
-  glVertexAttribPointer(glGetAttribLocation(program, "in_UV"), 2, GL_FLOAT, GL_FALSE, 0, 0);
+//  ~~ Shape::setColors()
+//	glBindBuffer(GL_ARRAY_BUFFER, cbo);
+//	glBufferData(GL_ARRAY_BUFFER, 4*nVertices*sizeof(float), cols, GL_STATIC_DRAW);
+//  ~~~
+	s->setColors(cols);
+	
+//  ~~ Shape::setElements()
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+//	glBufferData(GL_ELEMENT_ARRAY_BUFFER, nelements*sizeof(unsigned int), indices, GL_STATIC_DRAW);
+//  ~~~
+	s->setElements(indices, 6);
+	
+//  Shape::applyTexture()
+//	glBindBuffer(GL_ARRAY_BUFFER, tbo);
+//	glBufferData(GL_ARRAY_BUFFER, 2*nVertices*sizeof(float), UVs, GL_STATIC_DRAW);
 
-  glEnableVertexAttribArray(0);
-  glEnableVertexAttribArray(1);
-  glEnableVertexAttribArray(2);
+//	glGenTextures(1, &tex);
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, tex);
+//	glUniform1i(glGetUniformLocation(program, "tex"), 0);
+//	//  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, pixels);
+//	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 2, 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels2); // After reading one row of texels, pointer advances to next 4 byte boundary. Therefore ALWAYS use 4byte colour types. 
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glGenerateMipmap(GL_TEXTURE_2D);
+//  ~~~
+	s->applyTexture(UVs, pixels2, 2,2);
 
+//  ~~ Shape::render() ---> SEE in onDisplay()
+//	// drawing
+//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+//	glVertexAttribPointer(glGetAttribLocation(program, "in_pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+//	glBindBuffer(GL_ARRAY_BUFFER, cbo);
+//	glVertexAttribPointer(glGetAttribLocation(program, "in_col"), 4, GL_FLOAT, GL_FALSE, 0, 0);
+
+//	glBindBuffer(GL_ARRAY_BUFFER, tbo);
+//	glVertexAttribPointer(glGetAttribLocation(program, "in_UV"), 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+//	glEnableVertexAttribArray(0);
+//	glEnableVertexAttribArray(1);
+//	glEnableVertexAttribArray(2);
 
 
 
@@ -211,32 +229,49 @@ int main(int argc, char** argv)
   glutReshapeFunc(onResize);
   glutMainLoop();
 
-  glDisableVertexAttribArray(2);
-  glDisableVertexAttribArray(1);
-  glDisableVertexAttribArray(0);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(1, &tex);
+//	glDisableVertexAttribArray(2);
+//	glDisableVertexAttribArray(1);
+//	glDisableVertexAttribArray(0);
+//  ~~~
+	// s->render() in onDisplay
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &ebo);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &vbo);
+//  ~~ Shape::deleteTexture()
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glDeleteTextures(1, &tex);
+// ~~~
+	s->deleteTexture();
+	
+//  ~~ ~Shape()
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//	glDeleteBuffers(1, &ebo);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &cbo);
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+//	glDeleteBuffers(1, &vbo);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDeleteBuffers(1, &tbo);
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+//	glDeleteBuffers(1, &cbo);
+
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+//	glDeleteBuffers(1, &tbo);
+
+
+//	glDetachShader(program, vertexShader);
+//	glDetachShader(program, fragmentShader);
+//	glDeleteProgram(program);
+//	glDeleteShader(vertexShader);
+//	glDeleteShader(fragmentShader);
+//  ~~~
+	delete s;
+	
 
   glBindVertexArray(0);
   glDeleteVertexArrays(1, &vao);
 
-  glDetachShader(program, vertexShader);
-  glDetachShader(program, fragmentShader);
-  glDeleteProgram(program);
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+
   return 0;
 }
+
+
+
