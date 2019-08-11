@@ -21,7 +21,7 @@ GLLIB_PATH :=
 
 # flags
 COMMONFLAGS = -m64 
-CPPFLAGS = -O3 -std=c++11  
+CPPFLAGS = -O3 -std=c++11 -g 
 LINKFLAGS += $(COMMONFLAGS) 
 
 # libs
