@@ -4,37 +4,27 @@
 #include <iostream>
 using namespace std;
 
-void printError(const char *context)
-{
-  GLenum error = glGetError();
-  if (error != GL_NO_ERROR) {
-    fprintf(stderr, "%s: %s\n", context, gluErrorString(error));
-  };
+#define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
+
+void checkGLError(int file, int line){
+	GLenum err;
+	while((err = glGetError()) != GL_NO_ERROR){
+		cout << file << ":" << line << "Error: " << gluErrorString(err);
+	}
 }
 
-void printStatus(const char *step, GLuint context, GLuint status)
-{
-  GLint result = GL_FALSE;
-  glGetShaderiv(context, status, &result);
-  if (result == GL_FALSE) {
-    char buffer[1024];
-    if (status == GL_COMPILE_STATUS)
-      glGetShaderInfoLog(context, 1024, NULL, buffer);
-    else
-      glGetProgramInfoLog(context, 1024, NULL, buffer);
-    if (buffer[0])
-      fprintf(stderr, "%s: %s\n", step, buffer);
-  };
-}
-
-void printCompileStatus(const char *step, GLuint context)
-{
-  printStatus(step, context, GL_COMPILE_STATUS);
-}
-
-void printLinkStatus(const char *step, GLuint context)
-{
-  printStatus(step, context, GL_LINK_STATUS);
+void printStatus(const char *step, GLuint context, GLuint status){
+	GLint result = GL_FALSE;
+	glGetShaderiv(context, status, &result);
+	if (result == GL_FALSE) {
+		char buffer[1024];
+		if (status == GL_COMPILE_STATUS)
+			glGetShaderInfoLog(context, 1024, NULL, buffer);
+		else
+			glGetProgramInfoLog(context, 1024, NULL, buffer);
+		if (buffer[0])
+			fprintf(stderr, "%s: %s\n", step, buffer);
+	}
 }
 
 
@@ -61,6 +51,7 @@ GLuint loadShader(string filename, GLenum shader_type){
 Shape::Shape(int nverts, int _dim){
 	nVertices = nverts;
 	dim = _dim;
+	useColor = useTexture = useElements = false;
 	
 	vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
 	fragmentShader = loadShader("src/shaders/shader_fragment_tex.glsl", GL_FRAGMENT_SHADER);
@@ -69,19 +60,24 @@ Shape::Shape(int nverts, int _dim){
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
 	glLinkProgram(program);
-	printLinkStatus("Shader program", program);
+	printStatus("Shader program", program, GL_LINK_STATUS);
 	
 	glGenBuffers(1, &vbo);
-//	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//	glBufferData(GL_ARRAY_BUFFER, dim*nVertices*sizeof(float), NULL, GL_DYNAMIC_DRAW);
-
 	glGenBuffers(1, &cbo);
-//	glBindBuffer(GL_ARRAY_BUFFER, cbo);
-//	glBufferData(GL_ARRAY_BUFFER, 4*nVertices*sizeof(float), NULL, GL_DYNAMIC_DRAW);
-
 	glGenBuffers(1, &ebo);
 	glGenBuffers(1, &tbo);
 	
+	// apply a dummy 1x1 white texture 
+	unsigned char pixels[] = {255,255,255,0}; 
+	glGenTextures(1, &tex);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	glUniform1i(glGetUniformLocation(program, "tex"), 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // After reading one row of texels, pointer advances to next 4 byte boundary. Therefore ALWAYS use 4byte colour types. 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Shape::setVertices(float * verts){
@@ -90,11 +86,13 @@ void Shape::setVertices(float * verts){
 }
 
 void Shape::setColors(float * cols){
+	useColor = true;
 	glBindBuffer(GL_ARRAY_BUFFER, cbo);
 	glBufferData(GL_ARRAY_BUFFER, 4*nVertices*sizeof(float), cols, GL_DYNAMIC_DRAW);
 }
 
 void Shape::setElements(int * ele, int nelements){
+	useElements = true;
 	nElements = nelements;
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, nelements*sizeof(int), ele, GL_DYNAMIC_DRAW);
@@ -102,10 +100,9 @@ void Shape::setElements(int * ele, int nelements){
 
 
 void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
-	textured = true;
+	useTexture = true;
 	glBindBuffer(GL_ARRAY_BUFFER, tbo);
 	glBufferData(GL_ARRAY_BUFFER, 2*nVertices*sizeof(float), uvs, GL_DYNAMIC_DRAW);
-
 
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
@@ -120,31 +117,44 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 }
 
 void Shape::render(){
+
+	GLuint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(glGetAttribLocation(program, "in_pos"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(pos_loc, dim, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(pos_loc);
 
-	glBindBuffer(GL_ARRAY_BUFFER, cbo);
-	glVertexAttribPointer(glGetAttribLocation(program, "in_col"), 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, tbo);
-	glVertexAttribPointer(glGetAttribLocation(program, "in_UV"), 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-	glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-
+	GLuint col_loc = glGetAttribLocation(program, "in_col");
+	if (useColor){
+		glBindBuffer(GL_ARRAY_BUFFER, cbo);
+		glVertexAttribPointer(glGetAttribLocation(program, "in_col"), 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(col_loc);
+	}
+	else{
+		glVertexAttrib4f(col_loc, 1, 1, 1, 0);
+	}
+	
+	GLuint uv_loc = glGetAttribLocation(program, "in_UV");
+	if (useTexture){
+		glBindBuffer(GL_ARRAY_BUFFER, tbo);
+		glVertexAttribPointer(uv_loc, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(uv_loc);
+	}
+	else{
+		glVertexAttrib2f(glGetAttribLocation(program, "in_UV"), 0, 0);
+	}
+	
 	glUseProgram(program);
 	glDrawElements(GL_TRIANGLES, nElements, GL_UNSIGNED_INT, (void *)0);
 
-	glDisableVertexAttribArray(2);
-	glDisableVertexAttribArray(1);
-	glDisableVertexAttribArray(0);
+	if (useTexture) glDisableVertexAttribArray(uv_loc);
+	if (useColor)   glDisableVertexAttribArray(col_loc);
+	glDisableVertexAttribArray(pos_loc);
 
 }
 
 
 void Shape::deleteTexture(){
-	if (textured){
+	if (useTexture){
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDeleteTextures(1, &tex);
 	}

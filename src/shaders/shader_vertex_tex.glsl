@@ -1,8 +1,8 @@
 #version 330
 
-in  vec3 in_pos;
-in  vec2 in_UV;
-in  vec4 in_col;
+in vec3 in_pos;
+in vec4 in_col;
+in vec2 in_UV;
 
 out vec2 ex_UV;
 out vec4 ex_col;

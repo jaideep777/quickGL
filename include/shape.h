@@ -9,7 +9,7 @@ class Shape{
 	int nElements;
 	int dim;
 	
-	bool textured;
+	bool useColor, useTexture, useElements;
 		
 	GLuint vbo, cbo, ebo, tbo;
 
