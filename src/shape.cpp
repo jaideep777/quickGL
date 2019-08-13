@@ -88,6 +88,9 @@ Shape::Shape(int nverts, int _dim){
 
 Shape::~Shape(){
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteTextures(1, &tex);
+
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &ebo);
 
@@ -191,12 +194,10 @@ void Shape::render(){
 }
 
 
-void Shape::deleteTexture(){
-	if (useTexture){
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glDeleteTextures(1, &tex);
-	}
-}
+//void Shape::deleteTexture(){
+//	if (useTexture){
+//	}
+//}
 
 
 
