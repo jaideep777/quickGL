@@ -2,9 +2,13 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <list>
+#include <algorithm>
 using namespace std;
 
 #define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
+
+list <Shape*> allShapes;
 
 void checkGLError(int file, int line){
 	GLenum err;
@@ -68,7 +72,7 @@ Shape::Shape(int nverts, int _dim){
 	glGenBuffers(1, &tbo);
 	
 	// apply a dummy 1x1 white texture 
-	unsigned char pixels[] = {255,255,255,0}; 
+	unsigned char pixels[] = {255,255,255,255}; 
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -78,6 +82,8 @@ Shape::Shape(int nverts, int _dim){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	
+	allShapes.push_back(this);
 }
 
 void Shape::setVertices(float * verts){
@@ -130,7 +136,7 @@ void Shape::render(){
 		glEnableVertexAttribArray(col_loc);
 	}
 	else{
-		glVertexAttrib4f(col_loc, 1, 1, 1, 0);
+		glVertexAttrib4f(col_loc, 1, 1, 1, 1);
 	}
 	
 	GLuint uv_loc = glGetAttribLocation(program, "in_UV");
@@ -179,6 +185,11 @@ Shape::~Shape(){
 	glDeleteProgram(program);
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	
+	// TODO: replace with exceptions
+	list<Shape*>::iterator it = find(allShapes.begin(), allShapes.end(), this);
+	if (it != allShapes.end()) allShapes.erase(it);
+	else cout << "FATAL error: Shape destructor could not find shape in global list!" << endl;
 	
 }
 

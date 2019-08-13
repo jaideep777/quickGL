@@ -4,10 +4,13 @@
 #include <GL/glut.h>
 #include <string>
 #include <fstream>
+#include <list>
+#include <algorithm>
+#include <unistd.h>
 #include "../include/shape.h"
 using namespace std;
 
-Shape * s;
+extern list <Shape*> allShapes;
 
 GLuint vao;
 
@@ -22,8 +25,8 @@ void onDisplay(void)
 //  glUseProgram(program);
 //  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
 //  ~~~
-	s->render();
-  
+	for (auto it : allShapes) it->render();	
+	  
   glutSwapBuffers();
 }
 
@@ -37,7 +40,7 @@ void onResize(int w, int h)
 int main(int argc, char** argv)
 {
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+  glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);	
   glutInitWindowSize(width, height);
   glutCreateWindow("mini");
 
@@ -76,20 +79,23 @@ int main(int argc, char** argv)
 	int nVertices = 4;
 	int nelements = 6;
 
-	s = new Shape(4,3);
-	s->setVertices(vertices);
+	Shape s(4,3);
+	s.setVertices(vertices);
 //	s->setColors(cols);
-	s->setElements(indices, 6);
-	s->applyTexture(UVs, pixels2, 2,2);
+	s.setElements(indices, 6);
+//	s->applyTexture(UVs, pixels2, 2,2);
 
 
   glutDisplayFunc(onDisplay);
   glutReshapeFunc(onResize);
-  glutMainLoop();
 
+//	for (int i=0; i<1000; ++i){  
+	glutMainLoop();
+//	usleep(100);
+//	}
 
-	s->deleteTexture();
-	delete s;
+	s.deleteTexture();
+//	delete s;
 	
 
   glBindVertexArray(0);
