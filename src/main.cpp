@@ -1,7 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <string>
 #include <fstream>
 #include <list>
@@ -90,10 +90,10 @@ int main(int argc, char** argv)
   glutReshapeFunc(onResize);
 //	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
-//	for (int i=0; i<1000; ++i){  
-	glutMainLoop();
-//	usleep(100);
-//	}
+	for (int i=0; i<1000; ++i){  
+	glutMainLoopEvent();
+	usleep(100);
+	}
 
 //	s.deleteTexture();
 //	delete s;
