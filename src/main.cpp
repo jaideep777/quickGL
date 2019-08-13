@@ -10,7 +10,7 @@
 #include "../include/shape.h"
 using namespace std;
 
-extern list <Shape*> allShapes;
+//extern list <Shape*> allShapes;
 
 GLuint vao;
 
@@ -25,7 +25,7 @@ void onDisplay(void)
 //  glUseProgram(program);
 //  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
 //  ~~~
-	for (auto it : allShapes) it->render();	
+	for (auto it : Shape::allShapes) it->render();	
 	  
   glutSwapBuffers();
 }
@@ -88,6 +88,7 @@ int main(int argc, char** argv)
 
   glutDisplayFunc(onDisplay);
   glutReshapeFunc(onResize);
+//	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 //	for (int i=0; i<1000; ++i){  
 	glutMainLoop();

@@ -2,13 +2,12 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <list>
 #include <algorithm>
 using namespace std;
 
 #define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
 
-list <Shape*> allShapes;
+//list <Shape*> allShapes;
 
 void checkGLError(int file, int line){
 	GLenum err;
@@ -51,6 +50,7 @@ GLuint loadShader(string filename, GLenum shader_type){
 
 //}
 
+list<Shape*> Shape::allShapes;
 
 Shape::Shape(int nverts, int _dim){
 	nVertices = nverts;
@@ -85,6 +85,38 @@ Shape::Shape(int nverts, int _dim){
 	
 	allShapes.push_back(this);
 }
+
+Shape::~Shape(){
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &ebo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &vbo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &cbo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &tbo);
+
+	glDetachShader(program, vertexShader);
+	glDetachShader(program, fragmentShader);
+	glDeleteProgram(program);
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
+	try{
+		list<Shape*>::iterator it = find(allShapes.begin(), allShapes.end(), this);
+		if (it == allShapes.end()) throw string("Shape destructor could not find shape in global list!");
+		allShapes.erase(it);
+	}
+	catch(string s){ 
+		cout << "FATAL ERROR: " << s << endl; 
+	}
+	
+}
+
 
 void Shape::setVertices(float * verts){
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -164,33 +196,6 @@ void Shape::deleteTexture(){
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDeleteTextures(1, &tex);
 	}
-}
-
-Shape::~Shape(){
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &ebo);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &vbo);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &cbo);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &tbo);
-
-	glDetachShader(program, vertexShader);
-	glDetachShader(program, fragmentShader);
-	glDeleteProgram(program);
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	
-	// TODO: replace with exceptions
-	list<Shape*>::iterator it = find(allShapes.begin(), allShapes.end(), this);
-	if (it != allShapes.end()) allShapes.erase(it);
-	else cout << "FATAL error: Shape destructor could not find shape in global list!" << endl;
-	
 }
 
 
