@@ -1,16 +1,13 @@
-#include <math.h>
-#include <stdio.h>
-#include <GL/glew.h>
-#include <GL/freeglut.h>
+#include <iostream>
 #include <string>
 #include <fstream>
-#include <list>
-#include <algorithm>
 #include <unistd.h>
 #include "../include/shape.h"
 using namespace std;
 
 //extern list <Shape*> allShapes;
+extern glm::mat4 projection;
+extern glm::mat4 view; 
 
 GLuint vao;
 
@@ -23,10 +20,7 @@ void onDisplay(void)
 
   glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//  ~~ Shape::render()
-//  glUseProgram(program);
-//  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
-//  ~~~
+
 	for (auto it : Shape::allShapes) it->render();	
 	  
   glutSwapBuffers();
@@ -100,8 +94,7 @@ int main(int argc, char** argv)
 //	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 
-	// default camera looks into +z direction, so -ve z values are in front.
-	GLfloat vertices_b[] = {
+	GLfloat vertices_f[] = {
 	   0.25f,  0.25f,  0.5f,
 	  -0.75f,  0.25f,  0.5f,
 	  -0.75f, -0.75f,  0.5f,
@@ -109,7 +102,7 @@ int main(int argc, char** argv)
 	};
 	float cols_r[] = {1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5 };
 
-	GLfloat vertices_f[] = {
+	GLfloat vertices_b[] = {
 	   0.75f,  0.75f,  -0.5f,
 	  -0.25f,  0.75f,  -0.5f,
 	  -0.25f, -0.25f,  -0.5f,
@@ -119,16 +112,21 @@ int main(int argc, char** argv)
 	float cols_g[] = {0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5 };
 
 
-	Shape back(4);
-	back.setVertices(vertices_b);
-	back.setColors(cols_g);
-	back.setElements(indices, 6);
-
 	Shape front(4);
 	front.setVertices(vertices_f);
 	front.setColors(cols_b);
 	front.setElements(indices, 6);
 
+	Shape back(4);
+	back.setVertices(vertices_b);
+	back.setColors(cols_g);
+	back.setElements(indices, 6);
+
+
+	projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
+	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), 
+					   glm::vec3(0.0f, 0.0f, 0.0f), 
+					   glm::vec3(0.0f, 1.0f, 0.0f));
 
 
 //	for (int i=0; i<10000; ++i){  

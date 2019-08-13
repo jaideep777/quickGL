@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <list>
+#include <string>
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -15,9 +16,7 @@ class Shape{
 	public:
 	int nVertices;
 	int nElements;
-	
-	glm::vec3 bbox0, bbox1;
-	
+		
 	bool useColor, useTexture, useElements;
 	bool useTransparency;
 		
@@ -28,6 +27,9 @@ class Shape{
 	GLuint vertexShader, fragmentShader;
 	GLuint program;
 
+	glm::mat4 model, world;
+	glm::vec3 bbox0, bbox1;
+	
 	public:
 	static std::list<Shape*> allShapes;	// a list of all currently existing shapes 
 	
@@ -40,6 +42,8 @@ class Shape{
 	void setElements(int * ele, int nelements);
 	void applyTexture(float * uvs, unsigned char * image, int w, int h);
 	void deleteTexture();
+
+	void setShaderVariable(std::string s, glm::mat4 f);
 
 	virtual void render();
 	

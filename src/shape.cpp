@@ -8,7 +8,8 @@ using namespace std;
 
 #define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
 
-//list <Shape*> allShapes;
+glm::mat4 projection(1.f);
+glm::mat4 view(1.f); 
 
 void checkGLError(int file, int line){
 	GLenum err;
@@ -46,19 +47,13 @@ GLuint loadShader(string filename, GLenum shader_type){
 	return shader_id;
 }
 
-// comparator function to sort shapes by opaqueness (opaque first) and then by z (distance first)
-bool compare_z(Shape * first, Shape * last){
-//	float of = first->
-	return false;
-}
-
-
 
 list<Shape*> Shape::allShapes;
 
 Shape::Shape(int nverts){
 	nVertices = nverts;
 	useColor = useTexture = useElements = false;
+	model = world = glm::mat4(1.f);
 	
 	vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
 	fragmentShader = loadShader("src/shaders/shader_fragment_tex.glsl", GL_FRAGMENT_SHADER);
@@ -86,9 +81,11 @@ Shape::Shape(int nverts){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
+	// Put shape into global list. TODO: May use binary search here to avoid the next sorting step
 	allShapes.push_back(this);
 	
-	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) > min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
+	// sort the shapes by distance to camera, so that transparency is handled correctly. We are just sorting shapes, not individual triangles, and praying to god that thats good enough! 
+	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) < min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
 }
 
 Shape::~Shape(){
@@ -173,6 +170,11 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 
 }
 
+void Shape::setShaderVariable(string s, glm::mat4 f){
+	GLuint loc = glGetUniformLocation(program, s.c_str());
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(f));
+}
+
 void Shape::render(){
 
 	GLuint pos_loc = glGetAttribLocation(program, "in_pos");
@@ -201,6 +203,8 @@ void Shape::render(){
 	}
 	
 	glUseProgram(program);
+	setShaderVariable("transform", projection*view*world*model);
+
 	glDrawElements(GL_TRIANGLES, nElements, GL_UNSIGNED_INT, (void *)0);
 
 	if (useTexture) glDisableVertexAttribArray(uv_loc);
