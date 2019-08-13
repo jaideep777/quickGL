@@ -44,6 +44,11 @@ int main(int argc, char** argv)
   glutInitWindowSize(width, height);
   glutCreateWindow("mini");
 
+ 	glEnable(GL_BLEND);
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+//	glEnable(GL_DEPTH_TEST);
+
   glewExperimental = GL_TRUE;
   glewInit();
 
@@ -68,12 +73,12 @@ int main(int argc, char** argv)
 	   1.0f, 0.0f
 	};
 
-	float cols[] = {1,1,1,0, 1,0,0,0, 0,0,1,0, 0,1,0,0 };
+	float cols[] = {1,1,1,0.5, 1,0,0,0.5, 0,0,1,0.5, 0,1,0,0.5 };
 	
 	int indices[] = { 0, 1, 2, 2,3,0 };
 	unsigned char pixels2[] = {
-	  0, 0,255,0, 	0, 255, 0,0,
-	  255,0,0,0,    255,255,255,0
+	  0, 0,255,255, 	0, 255, 0,255,
+	  255,0,0,255,    255,255,255,255
 	};
 
 	int nVertices = 4;
@@ -81,19 +86,19 @@ int main(int argc, char** argv)
 
 	Shape s(4,3);
 	s.setVertices(vertices);
-//	s->setColors(cols);
+//	s.setColors(cols);
 	s.setElements(indices, 6);
-//	s->applyTexture(UVs, pixels2, 2,2);
+//	s.applyTexture(UVs, pixels2, 2,2);
 
 
   glutDisplayFunc(onDisplay);
   glutReshapeFunc(onResize);
 //	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
-	for (int i=0; i<1000; ++i){  
-	glutMainLoopEvent();
-	usleep(100);
-	}
+//	for (int i=0; i<10000; ++i){  
+	glutMainLoop();
+//	usleep(100);
+//	}
 
 //	s.deleteTexture();
 //	delete s;

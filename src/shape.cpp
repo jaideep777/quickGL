@@ -171,7 +171,7 @@ void Shape::render(){
 		glEnableVertexAttribArray(col_loc);
 	}
 	else{
-		glVertexAttrib4f(col_loc, 1, 1, 1, 1);
+		glVertexAttrib4f(col_loc, 1, 1, 1, 0.5);
 	}
 	
 	GLuint uv_loc = glGetAttribLocation(program, "in_UV");
