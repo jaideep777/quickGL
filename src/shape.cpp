@@ -87,6 +87,8 @@ Shape::Shape(int nverts){
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
 	allShapes.push_back(this);
+	
+	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) > min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
 }
 
 Shape::~Shape(){
