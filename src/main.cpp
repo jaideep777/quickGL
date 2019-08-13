@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	int nVertices = 4;
 	int nelements = 6;
 
-//	Shape s(4,3);
+//	Shape s(4);
 //	s.setVertices(vertices);
 ////	s.setColors(cols);
 //	s.setElements(indices, 6);
@@ -119,12 +119,12 @@ int main(int argc, char** argv)
 	float cols_g[] = {0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5 };
 
 
-	Shape back(4,3);
+	Shape back(4);
 	back.setVertices(vertices_b);
 	back.setColors(cols_g);
 	back.setElements(indices, 6);
 
-	Shape front(4,3);
+	Shape front(4);
 	front.setVertices(vertices_f);
 	front.setColors(cols_b);
 	front.setElements(indices, 6);

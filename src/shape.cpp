@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 using namespace std;
 
 #define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
@@ -45,16 +46,18 @@ GLuint loadShader(string filename, GLenum shader_type){
 	return shader_id;
 }
 
-//void Shape::createShaders(){
+// comparator function to sort shapes by opaqueness (opaque first) and then by z (distance first)
+bool compare_z(Shape * first, Shape * last){
+//	float of = first->
+	return false;
+}
 
 
-//}
 
 list<Shape*> Shape::allShapes;
 
-Shape::Shape(int nverts, int _dim){
+Shape::Shape(int nverts){
 	nVertices = nverts;
-	dim = _dim;
 	useColor = useTexture = useElements = false;
 	
 	vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
@@ -121,10 +124,21 @@ Shape::~Shape(){
 }
 
 
+
 void Shape::setVertices(float * verts){
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, dim*nVertices*sizeof(float), verts, GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 3*nVertices*sizeof(float), verts, GL_DYNAMIC_DRAW);
+
+	bbox0 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(1e20,1e20,1e20),
+						[](const glm::vec3& p1, const glm::vec3& p2){ return glm::vec3(min(p1.x,p2.x), min(p1.y,p2.y), min(p1.z,p2.z));});
+
+	bbox1 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(-1e20,-1e20,-1e20),
+						[](const glm::vec3& p1, const glm::vec3& p2){ return glm::vec3(max(p1.x,p2.x), max(p1.y,p2.y), max(p1.z,p2.z));});
+	
+	cout << "Shape bounding box: [" << bbox0.x << " " << bbox0.y << " " << bbox0.z << "] ["  
+								    << bbox1.x << " " << bbox1.y << " " << bbox1.z << "]" << endl;
 }
+
 
 void Shape::setColors(float * cols){
 	useColor = true;
@@ -161,7 +175,7 @@ void Shape::render(){
 
 	GLuint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glVertexAttribPointer(pos_loc, dim, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_loc);
 
 	GLuint col_loc = glGetAttribLocation(program, "in_col");

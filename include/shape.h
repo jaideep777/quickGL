@@ -4,13 +4,22 @@
 #include <GL/glut.h>
 #include <list>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/vector_angle.hpp"
+
 class Shape{
 	public:
 	int nVertices;
 	int nElements;
-	int dim;
+	
+	glm::vec3 bbox0, bbox1;
 	
 	bool useColor, useTexture, useElements;
+	bool useTransparency;
 		
 	GLuint vbo, cbo, ebo, tbo;
 
@@ -23,7 +32,7 @@ class Shape{
 	static std::list<Shape*> allShapes;	// a list of all currently existing shapes 
 	
 	public:
-	Shape(int nverts, int _dim);
+	Shape(int nverts);
 	virtual ~Shape();
 
 	void setVertices(float * verts);
