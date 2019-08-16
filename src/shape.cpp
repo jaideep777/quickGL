@@ -167,6 +167,9 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	glBindBuffer(GL_ARRAY_BUFFER, tbo);
 	glBufferData(GL_ARRAY_BUFFER, 2*nVertices*sizeof(float), uvs, GL_DYNAMIC_DRAW);
 
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glDeleteTextures(1, &tex);
+
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);

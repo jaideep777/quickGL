@@ -83,11 +83,11 @@ int main(int argc, char** argv)
 	int nVertices = 4;
 	int nelements = 6;
 
-//	Shape s(4);
-//	s.setVertices(vertices);
-////	s.setColors(cols);
-//	s.setElements(indices, 6);
-////	s.applyTexture(UVs, pixels2, 2,2);
+	Shape s(4, GL_TRIANGLES);
+	s.setVertices(vertices);
+	s.setColors(cols);
+	s.setElements(indices, 6);
+	s.applyTexture(UVs, pixels2, 2,2);
 
 
   glutDisplayFunc(onDisplay);
@@ -125,6 +125,10 @@ int main(int argc, char** argv)
 	back.autoExtent();
 	glm::vec3 b0 = back.getTransformedBBox0();
 	glm::vec3 b1 = back.getTransformedBBox1();
+
+	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
+		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
+
 	
 	float pos3[] = {0,0,0, 100,0,0, 0,0,0, 0,100,0, 0,0,0, 0,0,100};
 	float col3[] = {1,0,0, 0.5,
@@ -139,9 +143,6 @@ int main(int argc, char** argv)
 	axis.setVertices(pos3);
 	axis.setColors(col3);
 
-
-	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
-		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
 
 
 	
