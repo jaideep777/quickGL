@@ -6,21 +6,23 @@
 #include <numeric>
 using namespace std;
 
-#define CHECK_GL_ERROR() CheckGLError(__FILE__, __LINE__)
+#define CHECK_GL_ERROR() checkGLError(__FILE__, __LINE__)
 
 glm::mat4 projection(1.f);
 glm::mat4 view(1.f); 
 
-void checkGLError(int file, int line){
+void checkGLError(const char * file, int line){
 	GLenum err;
 	while((err = glGetError()) != GL_NO_ERROR){
-		cout << file << ":" << line << "Error: " << gluErrorString(err);
+		cout << file << ":" << line << "Error: " << gluErrorString(err) << endl;
 	}
 }
 
 void printStatus(const char *step, GLuint context, GLuint status){
 	GLint result = GL_FALSE;
+	CHECK_GL_ERROR();
 	glGetShaderiv(context, status, &result);
+	CHECK_GL_ERROR();
 	if (result == GL_FALSE) {
 		char buffer[1024];
 		if (status == GL_COMPILE_STATUS)
@@ -58,20 +60,23 @@ Shape::Shape(int nverts, GLenum mode){
 	
 	vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
 	fragmentShader = loadShader("src/shaders/shader_fragment_tex.glsl", GL_FRAGMENT_SHADER);
+	CHECK_GL_ERROR();
 
 	program = glCreateProgram();
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
 	glLinkProgram(program);
-	printStatus("Shader program", program, GL_LINK_STATUS);
+//	printStatus("Shader program", program, GL_LINK_STATUS);
 	
 	glGenBuffers(1, &vbo);
 	glGenBuffers(1, &cbo);
 	glGenBuffers(1, &ebo);
 	glGenBuffers(1, &tbo);
+	CHECK_GL_ERROR();
 	
+	glUseProgram(program);
 	// apply a dummy 1x1 white texture 
-	unsigned char pixels[] = {255,255,255,255}; 
+	unsigned char pixels[] = {255,128,128,255}; 
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -81,6 +86,7 @@ Shape::Shape(int nverts, GLenum mode){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	CHECK_GL_ERROR();
 	
 	// Put shape into global list. 
 	allShapes.push_back(this);
@@ -164,11 +170,15 @@ void Shape::setElements(int * ele, int nelements){
 
 void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	useTexture = true;
+	glUseProgram(program);
+	
 	glBindBuffer(GL_ARRAY_BUFFER, tbo);
 	glBufferData(GL_ARRAY_BUFFER, 2*nVertices*sizeof(float), uvs, GL_DYNAMIC_DRAW);
+	CHECK_GL_ERROR();
 
-//	glBindTexture(GL_TEXTURE_2D, 0);
-//	glDeleteTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDeleteTextures(1, &tex);
+	CHECK_GL_ERROR();
 
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
@@ -179,6 +189,8 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	CHECK_GL_ERROR();
+	
 
 }
 
@@ -202,6 +214,9 @@ void Shape::setShaderVariable(string s, glm::mat4 f){
 
 void Shape::render(){
 
+	glUseProgram(program);
+	setShaderVariable("transform", projection*view*world*model);
+
 	GLuint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -210,12 +225,13 @@ void Shape::render(){
 	GLuint col_loc = glGetAttribLocation(program, "in_col");
 	if (useColor){
 		glBindBuffer(GL_ARRAY_BUFFER, cbo);
-		glVertexAttribPointer(glGetAttribLocation(program, "in_col"), 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(col_loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(col_loc);
 	}
 	else{
 		glVertexAttrib4f(col_loc, 1, 1, 1, 1);
 	}
+	CHECK_GL_ERROR();
 	
 	GLuint uv_loc = glGetAttribLocation(program, "in_UV");
 	if (useTexture){
@@ -224,18 +240,17 @@ void Shape::render(){
 		glEnableVertexAttribArray(uv_loc);
 	}
 	else{
-		glVertexAttrib2f(glGetAttribLocation(program, "in_UV"), 0, 0);
+		glVertexAttrib2f(uv_loc, 0, 0);
 	}
+	CHECK_GL_ERROR();
 	
-	glUseProgram(program);
-	setShaderVariable("transform", projection*view*world*model);
-
 	if (useElements) glDrawElements(renderMode, nElements, GL_UNSIGNED_INT, (void *)0);
 	else             glDrawArrays(renderMode, 0, nVertices);
 
 	if (useTexture) glDisableVertexAttribArray(uv_loc);
 	if (useColor)   glDisableVertexAttribArray(col_loc);
 	glDisableVertexAttribArray(pos_loc);
+	CHECK_GL_ERROR();
 
 }
 
