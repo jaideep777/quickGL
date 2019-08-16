@@ -1,4 +1,4 @@
-#version 330
+#version 130
 
 in  vec2 ex_UV;
 in  vec4 ex_col;
@@ -11,3 +11,4 @@ void main()
 {
 	outColor = texture(tex, ex_UV)*ex_col;
 }
+

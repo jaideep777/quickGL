@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 	
  	glEnable(GL_BLEND);
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+//	glBlendFunc( GL_ONE, GL_ONE );
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -114,12 +115,12 @@ int main(int argc, char** argv)
 
 	Shape front(4);
 	front.setVertices(vertices_f);
-	front.setColors(cols_b);
+	front.setColors(cols_g);
 	front.setElements(indices, 6);
 
 	Shape back(4);
 	back.setVertices(vertices_b);
-	back.setColors(cols_g);
+	back.setColors(cols_b);
 	back.setElements(indices, 6);
 
 

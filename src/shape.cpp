@@ -81,10 +81,11 @@ Shape::Shape(int nverts){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	
-	// Put shape into global list. TODO: May use binary search here to avoid the next sorting step
+	// Put shape into global list. 
 	allShapes.push_back(this);
 	
 	// sort the shapes by distance to camera, so that transparency is handled correctly. We are just sorting shapes, not individual triangles, and praying to god that thats good enough! 
+	//   FIXME: Maybe this should not be done here, but rather by the camera when it is activated.
 	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) < min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
 }
 
