@@ -113,19 +113,41 @@ int main(int argc, char** argv)
 	float cols_g[] = {0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5 };
 
 
-	Shape front(4);
+	Shape front(4, GL_TRIANGLES);
 	front.setVertices(vertices_f);
 	front.setColors(cols_g);
 	front.setElements(indices, 6);
 
-	Shape back(4);
+	Shape back(4, GL_LINES);
 	back.setVertices(vertices_b);
 	back.setColors(cols_b);
 	back.setElements(indices, 6);
+	back.autoExtent();
+	glm::vec3 b0 = back.getTransformedBBox0();
+	glm::vec3 b1 = back.getTransformedBBox1();
+	
+	float pos3[] = {0,0,0, 100,0,0, 0,0,0, 0,100,0, 0,0,0, 0,0,100};
+	float col3[] = {1,0,0, 0.5,
+				    1,0,0, 0.5,
+				    0,1,0, 0.5,
+				    0,1,0, 0.5,
+				    0.0,0.8,1, 0.5,
+				    0.0,0.8,1, 0.5
+				   };
+	
+	Shape axis(6, GL_LINES);
+	axis.setVertices(pos3);
+	axis.setColors(col3);
 
+
+	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
+		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
+
+
+	
 
 	projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	view = glm::lookAt(glm::vec3(0.0f, 0.0f, 2.0f), 
+	view = glm::lookAt(glm::vec3(1.0f, 0.5f, 2.0f), 
 					   glm::vec3(0.0f, 0.0f, 0.0f), 
 					   glm::vec3(0.0f, 1.0f, 0.0f));
 

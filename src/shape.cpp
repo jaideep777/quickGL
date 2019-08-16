@@ -50,8 +50,9 @@ GLuint loadShader(string filename, GLenum shader_type){
 
 list<Shape*> Shape::allShapes;
 
-Shape::Shape(int nverts){
+Shape::Shape(int nverts, GLenum mode){
 	nVertices = nverts;
+	renderMode = mode;
 	useColor = useTexture = useElements = false;
 	model = world = glm::mat4(1.f);
 	
@@ -123,6 +124,13 @@ Shape::~Shape(){
 	
 }
 
+glm::vec3 Shape::getTransformedBBox0(){
+	return world*model*glm::vec4(bbox0, 1);
+}
+
+glm::vec3 Shape::getTransformedBBox1(){
+	return world*model*glm::vec4(bbox1, 1);
+}
 
 
 void Shape::setVertices(float * verts){
@@ -171,6 +179,19 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 
 }
 
+
+void Shape::autoExtent(){
+	glm::vec3 size = bbox1 - bbox0;
+	glm::vec3 centroid = (bbox0+bbox1)/2.f;
+	float scale = 2/fmax(fmax(size.x, size.y), size.z);
+
+	world = glm::mat4(1.f);
+	model = glm::mat4(1.f);
+	model = glm::scale(model, glm::vec3(scale, scale, scale));
+	model = glm::translate(model, -centroid);
+
+}
+
 void Shape::setShaderVariable(string s, glm::mat4 f){
 	GLuint loc = glGetUniformLocation(program, s.c_str());
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(f));
@@ -206,7 +227,8 @@ void Shape::render(){
 	glUseProgram(program);
 	setShaderVariable("transform", projection*view*world*model);
 
-	glDrawElements(GL_TRIANGLES, nElements, GL_UNSIGNED_INT, (void *)0);
+	if (useElements) glDrawElements(renderMode, nElements, GL_UNSIGNED_INT, (void *)0);
+	else             glDrawArrays(renderMode, 0, nVertices);
 
 	if (useTexture) glDisableVertexAttribArray(uv_loc);
 	if (useColor)   glDisableVertexAttribArray(col_loc);
