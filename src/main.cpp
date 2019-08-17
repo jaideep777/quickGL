@@ -18,7 +18,7 @@ void onDisplay(void)
 {
 
 
-  glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (auto it : Shape::allShapes) it->render();	
@@ -57,6 +57,18 @@ int main(int argc, char** argv)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
+	
+	float pos3[] = {0,0,0, 100,0,0, 0,0,0, 0,100,0, 0,0,0, 0,0,100};
+	float col3[] = {1,0,0, 0.5,
+				    1,0,0, 0.5,
+				    0,1,0, 0.5,
+				    0,1,0, 0.5,
+				    0.0,0.8,1, 0.5,
+				    0.0,0.8,1, 0.5
+				   };
+	
+
+
 	GLfloat vertices[] = {
 	   0.5f,  0.5f,  0.0f,
 	  -0.5f,  0.5f,  0.0f,
@@ -83,11 +95,17 @@ int main(int argc, char** argv)
 	int nVertices = 4;
 	int nelements = 6;
 
+
 	Shape s(4, GL_TRIANGLES);
 	s.setVertices(vertices);
 	s.setColors(cols);
 	s.setElements(indices, 6);
-//	s.applyTexture(UVs, pixels2, 2,2);
+	s.applyTexture(UVs, pixels2, 2,2);
+
+	Shape axis(6, GL_LINES);
+	axis.setVertices(pos3);
+	axis.setColors(col3);
+	axis.applyTexture(UVs, pixels2, 2,2);
 
 
   glutDisplayFunc(onDisplay);
@@ -95,62 +113,57 @@ int main(int argc, char** argv)
 //	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 
-//	GLfloat vertices_f[] = {
-//	   0.25f,  0.25f,  0.5f,
-//	  -0.75f,  0.25f,  0.5f,
-//	  -0.75f, -0.75f,  0.5f,
-//	   0.25f, -0.75f,  0.5f
-//	};
-//	float cols_r[] = {1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5 };
+	GLfloat vertices_f[] = {
+	   0.25f,  0.25f,  0.5f,
+	  -0.75f,  0.25f,  0.5f,
+	  -0.75f, -0.75f,  0.5f,
+	   0.25f, -0.75f,  0.5f
+	};
+	float cols_r[] = {1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5, 1,0,0,0.5 };
 
-//	GLfloat vertices_b[] = {
-//	   0.75f,  0.75f,  -0.5f,
-//	  -0.25f,  0.75f,  -0.5f,
-//	  -0.25f, -0.25f,  -0.5f,
-//	   0.75f, -0.25f,  -0.5f
-//	};
-//	float cols_b[] = {0,0,1,0.5, 0,0,1,0.5, 0,0,1,0.5, 0,0,1,0.5 };
-//	float cols_g[] = {0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5 };
+	GLfloat vertices_b[] = {
+	   0.75f,  0.75f,  -0.5f,
+	  -0.25f,  0.75f,  -0.5f,
+	  -0.25f, -0.25f,  -0.5f,
+	   0.75f, -0.25f,  -0.5f
+	};
+	float cols_b[] = {0,0,1,0.5, 0,0,1,0.5, 0,0,1,0.5, 0,0,1,0.5 };
+	float cols_g[] = {0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5, 0,1,0,0.5 };
+
+	unsigned char pixels3[] = {
+	  255, 0,255,255, 	0, 255, 255,255, 255, 0, 255,255,
+	  128,0,0,255,    255,255,0,255,     0, 255, 255,255
+	};
 
 
-//	Shape front(4, GL_TRIANGLES);
-//	front.setVertices(vertices_f);
-//	front.setColors(cols_g);
-//	front.setElements(indices, 6);
+	Shape front(4, GL_TRIANGLES);
+	front.setVertices(vertices_f);
+	front.setColors(cols);
+	front.setElements(indices, 6);
+	front.applyTexture(UVs, pixels3, 3,2);
 
-//	Shape back(4, GL_LINES);
-//	back.setVertices(vertices_b);
-//	back.setColors(cols_b);
-//	back.setElements(indices, 6);
+	Shape back(4, GL_TRIANGLES);
+	back.setVertices(vertices_b);
+	back.setColors(cols_b);
+	back.setElements(indices, 6);
 //	back.autoExtent();
-//	glm::vec3 b0 = back.getTransformedBBox0();
-//	glm::vec3 b1 = back.getTransformedBBox1();
+	glm::vec3 b0 = back.getTransformedBBox0();
+	glm::vec3 b1 = back.getTransformedBBox1();
+	back.applyTexture(UVs, pixels2, 2,2);
+	
 
-//	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
-//		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
+	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
+		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
 
-//	
-//	float pos3[] = {0,0,0, 100,0,0, 0,0,0, 0,100,0, 0,0,0, 0,0,100};
-//	float col3[] = {1,0,0, 0.5,
-//				    1,0,0, 0.5,
-//				    0,1,0, 0.5,
-//				    0,1,0, 0.5,
-//				    0.0,0.8,1, 0.5,
-//				    0.0,0.8,1, 0.5
-//				   };
-//	
-//	Shape axis(6, GL_LINES);
-//	axis.setVertices(pos3);
-//	axis.setColors(col3);
 
 
 
 //	
 
-//	projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-//	view = glm::lookAt(glm::vec3(1.0f, 0.5f, 2.0f), 
-//					   glm::vec3(0.0f, 0.0f, 0.0f), 
-//					   glm::vec3(0.0f, 1.0f, 0.0f));
+	projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
+	view = glm::lookAt(glm::vec3(1.0f, 0.5f, 2.0f), 
+					   glm::vec3(0.0f, 0.0f, 0.0f), 
+					   glm::vec3(0.0f, 1.0f, 0.0f));
 
 
 //	for (int i=0; i<10000; ++i){  

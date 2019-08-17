@@ -14,7 +14,7 @@ glm::mat4 view(1.f);
 void checkGLError(const char * file, int line){
 	GLenum err;
 	while((err = glGetError()) != GL_NO_ERROR){
-		cout << file << ":" << line << "Error: " << gluErrorString(err) << endl;
+		cout << file << ":" << line << "   Error: " << gluErrorString(err) << endl;
 	}
 }
 
@@ -76,7 +76,7 @@ Shape::Shape(int nverts, GLenum mode){
 	
 	glUseProgram(program);
 	// apply a dummy 1x1 white texture 
-	unsigned char pixels[] = {255,128,128,255}; 
+	unsigned char pixels[] = {255,255,255,255}; 
 	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -190,7 +190,6 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	CHECK_GL_ERROR();
-	
 
 }
 
@@ -217,12 +216,13 @@ void Shape::render(){
 	glUseProgram(program);
 	setShaderVariable("transform", projection*view*world*model);
 
-	GLuint pos_loc = glGetAttribLocation(program, "in_pos");
+	GLint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(pos_loc);
+	CHECK_GL_ERROR();
 
-	GLuint col_loc = glGetAttribLocation(program, "in_col");
+	GLint col_loc = glGetAttribLocation(program, "in_col");
 	if (useColor){
 		glBindBuffer(GL_ARRAY_BUFFER, cbo);
 		glVertexAttribPointer(col_loc, 4, GL_FLOAT, GL_FALSE, 0, 0);
@@ -233,7 +233,7 @@ void Shape::render(){
 	}
 	CHECK_GL_ERROR();
 	
-	GLuint uv_loc = glGetAttribLocation(program, "in_UV");
+	GLint uv_loc = glGetAttribLocation(program, "in_UV");
 	if (useTexture){
 		glBindBuffer(GL_ARRAY_BUFFER, tbo);
 		glVertexAttribPointer(uv_loc, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -242,6 +242,9 @@ void Shape::render(){
 	else{
 		glVertexAttrib2f(uv_loc, 0, 0);
 	}
+
+	glBindTexture(GL_TEXTURE_2D, tex);
+
 	CHECK_GL_ERROR();
 	
 	if (useElements) glDrawElements(renderMode, nElements, GL_UNSIGNED_INT, (void *)0);
