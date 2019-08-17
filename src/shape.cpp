@@ -176,11 +176,11 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	glBufferData(GL_ARRAY_BUFFER, 2*nVertices*sizeof(float), uvs, GL_DYNAMIC_DRAW);
 	CHECK_GL_ERROR();
 
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glDeleteTextures(1, &tex);
-	CHECK_GL_ERROR();
+//	glBindTexture(GL_TEXTURE_2D, 0);
+//	glDeleteTextures(1, &tex);
+//	CHECK_GL_ERROR();
 
-	glGenTextures(1, &tex);
+//	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glUniform1i(glGetUniformLocation(program, "tex"), 0);

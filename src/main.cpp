@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 	Shape axis(6, GL_LINES);
 	axis.setVertices(pos3);
 	axis.setColors(col3);
-	axis.applyTexture(UVs, pixels2, 2,2);
+//	axis.applyTexture(UVs, pixels2, 2,2);
 
 
   glutDisplayFunc(onDisplay);
@@ -149,7 +149,7 @@ int main(int argc, char** argv)
 //	back.autoExtent();
 	glm::vec3 b0 = back.getTransformedBBox0();
 	glm::vec3 b1 = back.getTransformedBBox1();
-	back.applyTexture(UVs, pixels2, 2,2);
+//	back.applyTexture(UVs, pixels2, 2,2);
 	
 
 	cout << "Trans bounding box: [" << b0.x << " " << b0.y << " " << b0.z << "] ["  
