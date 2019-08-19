@@ -18,7 +18,7 @@ int width = 320;
 int height = 240;
 
 
-
+// SimpleGL follows the principle of creating all objects (including cameras) aligned to axes and then using the matrices to get then in position
 
 class Tool{
 	protected:
@@ -27,6 +27,7 @@ class Tool{
 	
 	public:
 	Tool(){
+		mClick = lClick = rClick = 0;
 		activeTools.push_front(this);
 	}
 
@@ -91,12 +92,12 @@ class Tool{
 
 list <Tool*> Tool::activeTools;
 
-class CameraTransformer : public Tool{
+class CameraTool : public Tool{
 	private:
 	Camera * affectedCam;
 
 	public:
-	CameraTransformer(Camera * C) : Tool(){
+	CameraTool(Camera * C) : Tool(){
 		affectedCam = C;
 	}
 
@@ -104,10 +105,11 @@ class CameraTransformer : public Tool{
 //		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
 //		captureClick(button, state, x,y);		
 //	}
-	
+		
 	virtual void onMouseMove(int x, int y){
 		float h = glutGet(GLUT_WINDOW_HEIGHT);
 		float w = glutGet(GLUT_WINDOW_WIDTH);
+
 		if (lClick == 1){
 			affectedCam->rx += 0.2*(y - y0);
 			affectedCam->ry += 0.2*(x - x0);
@@ -117,27 +119,13 @@ class CameraTransformer : public Tool{
 			affectedCam->sc *= 1+r;
 		}
 		if (mClick == 1){
-			affectedCam->ty -= (h/2.5)*(y - y0)/h;	// -= because y is measured from top
-			affectedCam->tx += (w/2.5)*(x - x0)/w;
+			affectedCam->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
+			affectedCam->tx += (w/250.f)*(x - x0)/w;
 		}
 		y0 = y;
 		x0 = x;
-		
-		glm::mat4 view = affectedCam->view0;
-		if (affectedCam->worldUp == glm::vec3(0.f, 1.f, 0.f)){
-		  	view = glm::translate(view, glm::vec3(affectedCam->tx, affectedCam->ty, 0));
-		  	view = glm::scale(view, glm::vec3(affectedCam->sc, affectedCam->sc, affectedCam->sc));
-		  	view = glm::rotate(view, affectedCam->rx*0.1f, glm::vec3(1.f, 0.f, 0.f));
-		  	view = glm::rotate(view, affectedCam->ry*0.1f, glm::vec3(0.f, 1.f, 0.f));
-		}
-		else if (affectedCam->worldUp == glm::vec3(0.f, 0.f, 1.f)){
-		  	view = glm::translate(view, glm::vec3(affectedCam->tx, 0, affectedCam->ty));
-		  	view = glm::scale(view, glm::vec3(affectedCam->sc, affectedCam->sc, affectedCam->sc));
-		  	view = glm::rotate(view, affectedCam->rx*0.1f, glm::vec3(1.f, 0.f, 0.f));
-		  	view = glm::rotate(view, affectedCam->ry*0.1f, glm::vec3(0.f, 0.f, 1.f));	// FIXME: second rotation should be around an axis in the screen plane, so that worldUp remains vertical. 
-		}
-		affectedCam->view = view;
-//		cout << affectedCam->rx << endl;
+	
+		affectedCam->transform();
 		
 		glutPostRedisplay();
 	}
@@ -161,7 +149,10 @@ void onDisplay(void)
 
 void onResize(int w, int h)
 {
-  width = w; height = h;
+  width = w; height = h;	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+				glm::vec3(0.0f, 0.0f, 0.0f), 
+				glm::vec3(0.0f, 0.0f, 1.0f));
+
   glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
@@ -199,7 +190,7 @@ int main(int argc, char** argv)
 	glBindVertexArray(vao);
 
 	
-	float pos3[] = {0,0,0, 100,0,0, 0,0,0, 0,100,0, 0,0,0, 0,0,100};
+	float pos3[] = {0,0,0, 10,0,0, 0,0,0, 0,10,0, 0,0,0, 0,0,10};
 	float col3[] = {1,0,0, 0.5,
 				    1,0,0, 0.5,
 				    0,1,0, 0.5,
@@ -305,15 +296,15 @@ int main(int argc, char** argv)
 
 
 
-
-//	
-
 //	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  //glm::vec3(1.0f, 0.5f, 2.0f), 
+	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				glm::vec3(0.0f, 0.0f, 0.0f), 
 				glm::vec3(0.0f, 0.0f, 1.0f));
+//	Camera cam(glm::vec3(0.0f, 0.0f, 2.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+//				glm::vec3(0.0f, 0.0f, 0.0f), 
+//				glm::vec3(0.0f, 1.0f, 0.0f));
 	Shape::activeCamera = &cam;
-	CameraTransformer camTrans(&cam);
+	CameraTool camTrans(&cam);
 
 //	for (int i=0; i<10000; ++i){  
 	glutMainLoop();

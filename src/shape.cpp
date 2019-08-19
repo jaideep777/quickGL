@@ -35,6 +35,31 @@ void printStatus(const char *step, GLuint context, GLuint status){
 }
 
 
+Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
+	position = _position;
+	lookingAt = _lookingAt;
+	worldUp = _worldUp;
+	view0 = view = glm::lookAt(position, lookingAt, worldUp);
+	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
+	lineOfSight = glm::normalize(lookingAt - position);
+	tx = ty = rx = ry = 0;
+	sc = 1;
+}
+
+glm::mat4 Camera::matrix(){
+	return projection*view;
+}
+
+void Camera::transform(){
+	glm::vec3 worldRt = glm::cross(lineOfSight, worldUp);
+	view = view0;
+  	view = glm::translate(view, worldRt*tx + worldUp*ty);	
+  	view = glm::scale(view, glm::vec3(sc, sc, sc));
+  	view = glm::rotate(view, rx*0.1f, worldRt); // lineOfSight stays constant because Camera rotations are NOT incremental
+  	view = glm::rotate(view, ry*0.1f, worldUp);	// First Rotation along z (up) axis 
+}
+
+
 GLuint loadShader(string filename, GLenum shader_type){
 	cout << "Loading shader from " << filename << endl;
 	ifstream fin(filename.c_str());

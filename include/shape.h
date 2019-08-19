@@ -16,24 +16,17 @@ class Camera{
 	public:
 	glm::vec3 position, lookingAt, worldUp;
 	glm::mat4 projection, view;
+	glm::vec3 lineOfSight;
+//	glm::mat4 trans;
 
 	glm::mat4 projection0, view0;
 	float tx, ty, rx, ry, sc;
 	
 	public:
-	Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
-		position = _position;
-		lookingAt = _lookingAt;
-		worldUp = _worldUp;
-		view0 = view = glm::lookAt(position, lookingAt, worldUp);
-		projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
-		tx = ty = rx = ry = 0;
-		sc = 1;
-	}
+	Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp);
+	glm::mat4 matrix();
 	
-	glm::mat4 matrix(){
-		return projection*view;
-	}
+	void transform();
 };
 
 
