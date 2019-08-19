@@ -23,6 +23,7 @@ int height = 240;
 class Tool{
 	protected:
 	bool lClick, mClick, rClick;	// whether any mouse button was clicked
+	bool wheelUp, wheelDown;
 	int x0, y0;						// mouse coordinates when any button was clicked
 	
 	public:
@@ -101,24 +102,37 @@ class CameraTool : public Tool{
 		affectedCam = C;
 	}
 
-//	virtual void onClick(int button, int state, int x, int y){
+	virtual void onClick(int button, int state, int x, int y){
 //		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
-//		captureClick(button, state, x,y);		
-//	}
+		captureClick(button, state, x,y);		
+
+		if (button == 3 && state == GLUT_DOWN){	// wheel down / pinch out
+			affectedCam->sc *= 1+0.1;
+		
+		}
+		if (button == 4 && state == GLUT_DOWN){	// wheel up / pinch in
+			affectedCam->sc *= 1-0.1;
+		}
+
+		affectedCam->transform();
+		
+		glutPostRedisplay();
+	}
+	
 		
 	virtual void onMouseMove(int x, int y){
 		float h = glutGet(GLUT_WINDOW_HEIGHT);
 		float w = glutGet(GLUT_WINDOW_WIDTH);
 
-		if (lClick == 1){
+		if (lClick){
 			affectedCam->rx += 0.2*(y - y0);
 			affectedCam->ry += 0.2*(x - x0);
 		}
-		if (rClick == 1){
-			float r = (y - y0)/h;
-			affectedCam->sc *= 1+r;
-		}
-		if (mClick == 1){
+//		if (rClick){
+//			float r = (y - y0)/h;
+//			affectedCam->sc *= 1+r;
+//		}
+		if (mClick || rClick){
 			affectedCam->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
 			affectedCam->tx += (w/250.f)*(x - x0)/w;
 		}
@@ -281,7 +295,7 @@ int main(int argc, char** argv)
 	front.setElements(indices, 6);
 	front.applyTexture(UVs, pixels3, 3,2);
 
-	Shape back(4, GL_TRIANGLES);
+	Shape back(4, GL_POINTS);
 	back.setVertices(vertices_b);
 	back.setColors(cols_b);
 	back.setElements(indices, 6);

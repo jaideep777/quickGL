@@ -57,6 +57,8 @@ void Camera::transform(){
   	view = glm::scale(view, glm::vec3(sc, sc, sc));
   	view = glm::rotate(view, rx*0.1f, worldRt); // lineOfSight stays constant because Camera rotations are NOT incremental
   	view = glm::rotate(view, ry*0.1f, worldUp);	// First Rotation along z (up) axis 
+
+	// TODO: Shapes list should be sorted here
 }
 
 
