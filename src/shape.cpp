@@ -8,8 +8,8 @@ using namespace std;
 
 #define CHECK_GL_ERROR() checkGLError(__FILE__, __LINE__)
 
-glm::mat4 projection(1.f);
-glm::mat4 view(1.f); 
+//glm::mat4 projection(1.f);
+//glm::mat4 view(1.f); 
 
 void checkGLError(const char * file, int line){
 	GLenum err;
@@ -51,6 +51,7 @@ GLuint loadShader(string filename, GLenum shader_type){
 
 
 list<Shape*> Shape::allShapes;
+Camera* Shape::activeCamera;
 
 Shape::Shape(int nverts, GLenum mode){
 	nVertices = nverts;
@@ -214,7 +215,7 @@ void Shape::setShaderVariable(string s, glm::mat4 f){
 void Shape::render(){
 
 	glUseProgram(program);
-	setShaderVariable("transform", projection*view*world*model);
+	setShaderVariable("transform", activeCamera->matrix()*world*model);
 
 	GLint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);

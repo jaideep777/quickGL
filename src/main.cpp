@@ -1,24 +1,157 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <list>
 #include <unistd.h>
+#include <functional>
+#include <algorithm>
 #include "../include/shape.h"
 using namespace std;
 
 //extern list <Shape*> allShapes;
-extern glm::mat4 projection;
-extern glm::mat4 view; 
+//extern glm::mat4 projection;
+//extern glm::mat4 view; 
 
 GLuint vao;
 
 int width = 320;
 int height = 240;
 
+
+
+
+class Tool{
+	protected:
+	bool lClick, mClick, rClick;	// whether any mouse button was clicked
+	int x0, y0;						// mouse coordinates when any button was clicked
+	
+	public:
+	Tool(){
+		activeTools.push_front(this);
+	}
+
+	virtual ~Tool(){
+		try{
+			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
+			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
+			activeTools.erase(it);
+		}
+		catch(string s){ 
+			cout << "FATAL ERROR: " << s << endl; 
+		}
+	}
+	
+	void captureClick(int button, int state, int x, int y){
+		if (button == GLUT_LEFT_BUTTON){
+			if (state == GLUT_DOWN){
+				cout << "L Click captured by Tool at: " << x << " " << y << endl;
+				lClick = true;
+				x0 = x;
+				y0 = y;
+			}
+			else{
+				lClick = false;
+			} 
+		}
+
+		if (button == GLUT_MIDDLE_BUTTON){
+			if (state == GLUT_DOWN){
+				cout << "M Click captured by Tool at: " << x << " " << y << endl;
+				mClick = true;
+				x0 = x;
+				y0 = y;
+			}
+			else{
+				mClick = false;
+			} 
+		}
+
+		if (button == GLUT_RIGHT_BUTTON){
+			if (state == GLUT_DOWN){
+				cout << "R Click captured by Tool at: " << x << " " << y << endl;
+				rClick = true;
+				x0 = x;
+				y0 = y;
+			}
+			else{
+				rClick = false;
+			} 
+
+		}
+	}
+	
+	virtual void onClick(int button, int state, int x, int y){
+		captureClick(button, state, x,y);		
+	}
+	
+	virtual void onMouseMove(int x, int y){};
+	
+	static list <Tool*> activeTools;
+};
+
+list <Tool*> Tool::activeTools;
+
+class CameraTransformer : public Tool{
+	private:
+	Camera * affectedCam;
+
+	public:
+	CameraTransformer(Camera * C) : Tool(){
+		affectedCam = C;
+	}
+
+//	virtual void onClick(int button, int state, int x, int y){
+//		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
+//		captureClick(button, state, x,y);		
+//	}
+	
+	virtual void onMouseMove(int x, int y){
+		float h = glutGet(GLUT_WINDOW_HEIGHT);
+		float w = glutGet(GLUT_WINDOW_WIDTH);
+		if (lClick == 1){
+			affectedCam->rx += 0.2*(y - y0);
+			affectedCam->ry += 0.2*(x - x0);
+		}
+		if (rClick == 1){
+			float r = (y - y0)/h;
+			affectedCam->sc *= 1+r;
+		}
+		if (mClick == 1){
+			affectedCam->ty -= (h/2.5)*(y - y0)/h;	// -= because y is measured from top
+			affectedCam->tx += (w/2.5)*(x - x0)/w;
+		}
+		y0 = y;
+		x0 = x;
+		
+		glm::mat4 view = affectedCam->view0;
+		if (affectedCam->worldUp == glm::vec3(0.f, 1.f, 0.f)){
+		  	view = glm::translate(view, glm::vec3(affectedCam->tx, affectedCam->ty, 0));
+		  	view = glm::scale(view, glm::vec3(affectedCam->sc, affectedCam->sc, affectedCam->sc));
+		  	view = glm::rotate(view, affectedCam->rx*0.1f, glm::vec3(1.f, 0.f, 0.f));
+		  	view = glm::rotate(view, affectedCam->ry*0.1f, glm::vec3(0.f, 1.f, 0.f));
+		}
+		else if (affectedCam->worldUp == glm::vec3(0.f, 0.f, 1.f)){
+		  	view = glm::translate(view, glm::vec3(affectedCam->tx, 0, affectedCam->ty));
+		  	view = glm::scale(view, glm::vec3(affectedCam->sc, affectedCam->sc, affectedCam->sc));
+		  	view = glm::rotate(view, affectedCam->rx*0.1f, glm::vec3(1.f, 0.f, 0.f));
+		  	view = glm::rotate(view, affectedCam->ry*0.1f, glm::vec3(0.f, 0.f, 1.f));	// FIXME: second rotation should be around an axis in the screen plane, so that worldUp remains vertical. 
+		}
+		affectedCam->view = view;
+//		cout << affectedCam->rx << endl;
+		
+		glutPostRedisplay();
+	}
+	
+};
+
+
+
+	
 void onDisplay(void)
 {
 
 
-  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	for (auto it : Shape::allShapes) it->render();	
@@ -32,6 +165,14 @@ void onResize(int w, int h)
   glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
+
+void onClick(int button, int state, int x, int y){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
+}
+
+void onMouseMove(int x, int y){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
+}
 
 int main(int argc, char** argv)
 {
@@ -108,8 +249,15 @@ int main(int argc, char** argv)
 //	axis.applyTexture(UVs, pixels2, 2,2);
 
 
+
   glutDisplayFunc(onDisplay);
   glutReshapeFunc(onResize);
+	glutMouseFunc(onClick);
+	glutMotionFunc(onMouseMove);
+	
+	
+//	registerCallbacks(b);
+
 //	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 
@@ -160,11 +308,12 @@ int main(int argc, char** argv)
 
 //	
 
-	projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	view = glm::lookAt(glm::vec3(1.0f, 0.5f, 2.0f), 
-					   glm::vec3(0.0f, 0.0f, 0.0f), 
-					   glm::vec3(0.0f, 1.0f, 0.0f));
-
+//	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
+	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  //glm::vec3(1.0f, 0.5f, 2.0f), 
+				glm::vec3(0.0f, 0.0f, 0.0f), 
+				glm::vec3(0.0f, 0.0f, 1.0f));
+	Shape::activeCamera = &cam;
+	CameraTransformer camTrans(&cam);
 
 //	for (int i=0; i<10000; ++i){  
 	glutMainLoop();

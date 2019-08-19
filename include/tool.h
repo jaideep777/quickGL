@@ -5,11 +5,11 @@
 
 class Tool{
 	public:
-	Shape * s; 		// affected shape
-	Shape * box; 	// tool's visualization shape
+	Shape * affectedShape; 		// affected shape
+	Shape * displayShape; 		// tool's visualization shape
 
 	public:
-	Tool(Shape * _s);
+	Tool(Shape * _affectedShape);
 	virtual ~Tool(){};
 	virtual void update();
 
@@ -21,6 +21,9 @@ class Tool{
 	virtual void initialize(int x, int y){};
 	virtual void transform(int x, int y){};
 	virtual void finalize(int x, int y){};
+	virtual void mouseMove(int x, int y);
+	virtual void mouseHover(int x, int y);
+	virtual void mouseClick(int x, int y){};
 };
 
 
