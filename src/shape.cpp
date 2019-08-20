@@ -35,7 +35,7 @@ void printStatus(const char *step, GLuint context, GLuint status){
 }
 
 
-// TODO: Transform camera after construction of axis aligned one to match specs
+// DONE: Transform camera after construction of axis aligned one to match specs
 //Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
 //	position = _position;
 //	lookingAt = _lookingAt;
@@ -48,38 +48,55 @@ void printStatus(const char *step, GLuint context, GLuint status){
 //	sc = 1;
 //}
 
+
+// Create axis-aligned camera, then rotate it to desired specs.
+// Having the camera axis-aligned creates predictable camera panning independent of camera orientation
 Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
-	position = glm::vec3(1.f,0.f,0.f);
-	lookingAt = glm::vec3(0.f,0.f,0.f);
+
+	// create camera aligned to x-axis
+	glm::vec3 pos0 = glm::vec3(glm::length(_position - _lookingAt),0.f,0.f);
+
 	worldUp = _worldUp;
-	lineOfSight = glm::normalize(lookingAt - position);
+	lineOfSight = glm::normalize(-pos0);	// at pos0 (on x axis), looking at origin
+	worldRt =  glm::normalize(glm::cross(lineOfSight, worldUp));
 	tx = ty = rx = ry = 0;
 	sc = 1;
+
+	view0 = view = glm::lookAt(pos0, glm::vec3(0.f, 0.f, 0.f), worldUp);
+
+	glm::vec3 dir = _position - _lookingAt;
 	
-	view = glm::lookAt(position, lookingAt, worldUp);
+	// calculate initial camera rotations required to bring it to specified position and lookAt
+//	rx = asin(dir.z/glm::length(dir))*10; ry = -atan2(dir.y, dir.x)*10;	// works only for z-up
+	rx = asin(glm::dot(dir, worldUp)/glm::length(dir));
+	ry = -atan2(glm::dot(dir, worldRt), glm::dot(dir, -lineOfSight));	
 
-	glm::vec3 worldRt = glm::cross(lineOfSight, worldUp);
-
-	view = translate(view, position - _position);	
-//	view = rotate(view, atan2((position)x,z), glm::vec3(0.f, 1.f, 0.f));
-	//TODO: complete
-	view0 = view;
+	// since we want rotation axis pinned at the actual origin, pre-rotate the translation vector by the initial rotations
+	glm::mat4 tv = glm::mat4(1.f);
+  	tv = glm::rotate(tv, rx, worldRt); 	
+  	tv = glm::rotate(tv, ry, worldUp);	
+	translation = tv*glm::vec4(-_lookingAt, 1.f); //1.f*tv*glm::vec4(+pos0-, 1.f);
+		
+	transform();
 	
 	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
 }
+
 
 glm::mat4 Camera::matrix(){
 	return projection*view;
 }
 
+
 void Camera::transform(){
-	glm::vec3 worldRt = glm::cross(lineOfSight, worldUp);
+//	glm::vec3 worldRt = glm::cross(lineOfSight, worldUp);
 	view = view0;
+  	view = glm::translate(view, translation);	
   	view = glm::translate(view, worldRt*tx + worldUp*ty);	
   	view = glm::scale(view, glm::vec3(sc, sc, sc));
-  	view = glm::rotate(view, rx*0.1f, worldRt); // lineOfSight stays constant because Camera rotations are NOT incremental
-  	view = glm::rotate(view, ry*0.1f, worldUp);	// First Rotation along z (up) axis 
-
+  	view = glm::rotate(view, rx, worldRt);  // worldRt stays constant because Camera rotations are NOT incremental
+  	view = glm::rotate(view, ry, worldUp);	// First Rotation along up axis 
+//	view = glm::translate(view, translation);
 	// TODO: Shapes list should be sorted here
 }
 
@@ -142,7 +159,7 @@ Shape::Shape(int nverts, GLenum mode){
 	allShapes.push_back(this);
 	
 	// sort the shapes by distance to camera, so that transparency is handled correctly. We are just sorting shapes, not individual triangles, and praying to god that thats good enough! 
-	//   FIXME: Maybe this should not be done here, but rather by the camera when it is activated.
+	// Sort shapes list so that newly inserted shape gets into the correct location.
 	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) < min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
 }
 

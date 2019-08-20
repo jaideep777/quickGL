@@ -14,10 +14,11 @@
 
 class Camera{
 	public:
-	glm::vec3 position, lookingAt, worldUp;
+//	glm::vec3 position, lookingAt;
+	glm::vec3 worldUp, worldRt;
 	glm::mat4 projection, view;
 	glm::vec3 lineOfSight;
-//	glm::mat4 trans;
+	glm::vec3 translation;
 
 	glm::mat4 projection0, view0;
 	float tx, ty, rx, ry, sc;

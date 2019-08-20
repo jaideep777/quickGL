@@ -125,8 +125,8 @@ class CameraTool : public Tool{
 		float w = glutGet(GLUT_WINDOW_WIDTH);
 
 		if (lClick){
-			affectedCam->rx += 0.2*(y - y0);
-			affectedCam->ry += 0.2*(x - x0);
+			affectedCam->rx += 0.02*(y - y0);
+			affectedCam->ry += 0.02*(x - x0);
 		}
 //		if (rClick){
 //			float r = (y - y0)/h;
@@ -299,7 +299,7 @@ int main(int argc, char** argv)
 	back.setVertices(vertices_b);
 	back.setColors(cols_po);
 	back.setElements(indices, 6);
-	back.setPointSize(16);
+	back.setPointSize(2);
 //	back.autoExtent();
 	glm::vec3 b0 = back.getTransformedBBox0();
 	glm::vec3 b1 = back.getTransformedBBox1();
@@ -310,10 +310,16 @@ int main(int argc, char** argv)
 		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
 
 
+	glm::vec3 pos(2.0f, 2.0f, 2.0f);
+	glm::vec3 lookat(0.0f, 2.0f, -3.0f);
 
+	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
+	Shape lineOfSight(2, GL_LINES);
+	lineOfSight.setVertices(pos_los);
+	
 //	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	Camera cam(glm::vec3(2.0f, 1.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-				glm::vec3(0.0f, 0.0f, 0.0f), 
+	Camera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+				lookat,
 				glm::vec3(0.0f, 0.0f, 1.0f));
 //	Camera cam(glm::vec3(0.0f, 0.0f, 2.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 //				glm::vec3(0.0f, 0.0f, 0.0f), 
