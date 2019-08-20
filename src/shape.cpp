@@ -35,15 +35,37 @@ void printStatus(const char *step, GLuint context, GLuint status){
 }
 
 
+// TODO: Transform camera after construction of axis aligned one to match specs
+//Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
+//	position = _position;
+//	lookingAt = _lookingAt;
+//	worldUp = _worldUp;
+//	
+//	view0 = view = glm::lookAt(position, lookingAt, worldUp);
+//	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
+//	lineOfSight = glm::normalize(lookingAt - position);
+//	tx = ty = rx = ry = 0;
+//	sc = 1;
+//}
+
 Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
-	position = _position;
-	lookingAt = _lookingAt;
+	position = glm::vec3(1.f,0.f,0.f);
+	lookingAt = glm::vec3(0.f,0.f,0.f);
 	worldUp = _worldUp;
-	view0 = view = glm::lookAt(position, lookingAt, worldUp);
-	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
 	lineOfSight = glm::normalize(lookingAt - position);
 	tx = ty = rx = ry = 0;
 	sc = 1;
+	
+	view = glm::lookAt(position, lookingAt, worldUp);
+
+	glm::vec3 worldRt = glm::cross(lineOfSight, worldUp);
+
+	view = translate(view, position - _position);	
+//	view = rotate(view, atan2((position)x,z), glm::vec3(0.f, 1.f, 0.f));
+	//TODO: complete
+	view0 = view;
+	
+	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
 }
 
 glm::mat4 Camera::matrix(){
@@ -237,6 +259,12 @@ void Shape::autoExtent(){
 void Shape::setShaderVariable(string s, glm::mat4 f){
 	GLuint loc = glGetUniformLocation(program, s.c_str());
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(f));
+}
+
+void Shape::setPointSize(float psize){
+	GLuint loc = glGetUniformLocation(program, "pointsize");
+	glUniform1f(loc, psize);
+	CHECK_GL_ERROR();
 }
 
 void Shape::render(){

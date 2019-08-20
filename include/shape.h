@@ -67,6 +67,7 @@ class Shape{
 	void autoExtent();
 
 	void setShaderVariable(std::string s, glm::mat4 f);
+	void setPointSize(float psize);
 
 	virtual void render();
 	

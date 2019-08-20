@@ -163,10 +163,7 @@ void onDisplay(void)
 
 void onResize(int w, int h)
 {
-  width = w; height = h;	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-				glm::vec3(0.0f, 0.0f, 0.0f), 
-				glm::vec3(0.0f, 0.0f, 1.0f));
-
+  width = w; height = h;
   glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
@@ -193,6 +190,8 @@ int main(int argc, char** argv)
 //	glBlendFunc( GL_ONE, GL_ONE );
 
 	glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
   glewExperimental = GL_TRUE;
   glewInit();
@@ -288,6 +287,7 @@ int main(int argc, char** argv)
 	  128,0,0,255,    255,255,0,255,     0, 255, 255,255
 	};
 
+	float cols_po[] = {0,0,1,1, 1,0,0,1, 0,1,0,1, 1,0,1,1 };
 
 	Shape front(4, GL_TRIANGLES);
 	front.setVertices(vertices_f);
@@ -297,8 +297,9 @@ int main(int argc, char** argv)
 
 	Shape back(4, GL_POINTS);
 	back.setVertices(vertices_b);
-	back.setColors(cols_b);
+	back.setColors(cols_po);
 	back.setElements(indices, 6);
+	back.setPointSize(16);
 //	back.autoExtent();
 	glm::vec3 b0 = back.getTransformedBBox0();
 	glm::vec3 b1 = back.getTransformedBBox1();
@@ -311,7 +312,7 @@ int main(int argc, char** argv)
 
 
 //	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	Camera cam(glm::vec3(0.0f, -2.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+	Camera cam(glm::vec3(2.0f, 1.0f, 0.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				glm::vec3(0.0f, 0.0f, 0.0f), 
 				glm::vec3(0.0f, 0.0f, 1.0f));
 //	Camera cam(glm::vec3(0.0f, 0.0f, 2.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
