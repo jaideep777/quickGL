@@ -5,12 +5,16 @@
 #include <list>
 #include <string>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_access.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/vector_angle.hpp"
+#include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+class Shape;
 
 class Camera{
 	public:
@@ -27,11 +31,16 @@ class Camera{
 	Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp);
 	glm::mat4 matrix();
 	
-	void transform();
+	void  transform();
+	void  activate();
+	float distanceToShape(Shape * s);
+	void  sortShapes();
+
 };
 
 
 class Shape{
+	friend class Camera;
 	public:
 	int nVertices;
 	int nElements;
@@ -52,6 +61,8 @@ class Shape{
 	
 	public:
 	static std::list<Shape*> allShapes;	// a list of all existing shapes 
+	
+	protected:
 	static Camera* activeCamera;
 	
 	public:
@@ -69,7 +80,7 @@ class Shape{
 
 	void setShaderVariable(std::string s, glm::mat4 f);
 	void setPointSize(float psize);
-
+	
 	virtual void render();
 	
 

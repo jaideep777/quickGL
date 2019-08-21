@@ -30,6 +30,7 @@ class Tool{
 	Tool(){
 		mClick = lClick = rClick = 0;
 		activeTools.push_front(this);
+		cout << "Constructing tool #" << activeTools.size() << ", " << activeTools.size() << " in list" << endl;
 	}
 
 	virtual ~Tool(){
@@ -37,6 +38,7 @@ class Tool{
 			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
 			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
 			activeTools.erase(it);
+			cout << "Destroying tool, " << activeTools.size() << " left in list." << endl;
 		}
 		catch(string s){ 
 			cout << "FATAL ERROR: " << s << endl; 
@@ -93,28 +95,42 @@ class Tool{
 
 list <Tool*> Tool::activeTools;
 
-class CameraTool : public Tool{
-	private:
-	Camera * affectedCam;
+class InteractiveCamera : public Tool{
+	public:
+	Camera * cam;
 
 	public:
-	CameraTool(Camera * C) : Tool(){
-		affectedCam = C;
+	InteractiveCamera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp) : Tool() {
+		cout << "Constructing ICam" << endl;
+		cam = new Camera(_position, _lookingAt, _worldUp);
 	}
+
+	virtual ~InteractiveCamera(){
+		delete cam;
+		cout << "Destroying ICam" << endl;
+	}
+	
+	void activate(){
+		cam->activate();
+	}
+	
+//	InteractiveCamera(Camera * C) : Tool(){
+//		cam = C;
+//	}
 
 	virtual void onClick(int button, int state, int x, int y){
 //		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
 		captureClick(button, state, x,y);		
 
 		if (button == 3 && state == GLUT_DOWN){	// wheel down / pinch out
-			affectedCam->sc *= 1+0.1;
+			cam->sc *= 1+0.1;
 		
 		}
 		if (button == 4 && state == GLUT_DOWN){	// wheel up / pinch in
-			affectedCam->sc *= 1-0.1;
+			cam->sc *= 1-0.1;
 		}
 
-		affectedCam->transform();
+//		cam->transform();
 		
 		glutPostRedisplay();
 	}
@@ -125,21 +141,21 @@ class CameraTool : public Tool{
 		float w = glutGet(GLUT_WINDOW_WIDTH);
 
 		if (lClick){
-			affectedCam->rx += 0.02*(y - y0);
-			affectedCam->ry += 0.02*(x - x0);
+			cam->rx += 0.02*(y - y0);
+			cam->ry += 0.02*(x - x0);
 		}
 //		if (rClick){
 //			float r = (y - y0)/h;
-//			affectedCam->sc *= 1+r;
+//			cam->sc *= 1+r;
 //		}
 		if (mClick || rClick){
-			affectedCam->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
-			affectedCam->tx += (w/250.f)*(x - x0)/w;
+			cam->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
+			cam->tx += (w/250.f)*(x - x0)/w;
 		}
 		y0 = y;
 		x0 = x;
 	
-		affectedCam->transform();
+		cam->transform();
 		
 		glutPostRedisplay();
 	}
@@ -178,6 +194,7 @@ void onMouseMove(int x, int y){
 
 int main(int argc, char** argv)
 {
+
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	
   glutInitWindowSize(width, height);
@@ -240,7 +257,6 @@ int main(int argc, char** argv)
 	int nVertices = 4;
 	int nelements = 6;
 
-
 	Shape s(4, GL_TRIANGLES);
 	s.setVertices(vertices);
 	s.setColors(cols);
@@ -287,7 +303,7 @@ int main(int argc, char** argv)
 	  128,0,0,255,    255,255,0,255,     0, 255, 255,255
 	};
 
-	float cols_po[] = {0,0,1,1, 1,0,0,1, 0,1,0,1, 1,0,1,1 };
+	float cols_po[] = {0,0,1,0.5, 1,0,0,0.5, 0,1,0,0.5, 1,0,1,0.5 };
 
 	Shape front(4, GL_TRIANGLES);
 	front.setVertices(vertices_f);
@@ -295,7 +311,7 @@ int main(int argc, char** argv)
 	front.setElements(indices, 6);
 	front.applyTexture(UVs, pixels3, 3,2);
 
-	Shape back(4, GL_POINTS);
+	Shape back(4, GL_TRIANGLES);
 	back.setVertices(vertices_b);
 	back.setColors(cols_po);
 	back.setElements(indices, 6);
@@ -311,24 +327,32 @@ int main(int argc, char** argv)
 
 
 	glm::vec3 pos(2.0f, 2.0f, 2.0f);
-	glm::vec3 lookat(0.0f, 2.0f, -3.0f);
+	glm::vec3 lookat(2.0f, 2.0f, 0.0f);
 
-	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
-	Shape lineOfSight(2, GL_LINES);
-	lineOfSight.setVertices(pos_los);
 	
 //	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
-	Camera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+	InteractiveCamera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				lookat,
 				glm::vec3(0.0f, 0.0f, 1.0f));
 //	Camera cam(glm::vec3(0.0f, 0.0f, 2.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 //				glm::vec3(0.0f, 0.0f, 0.0f), 
 //				glm::vec3(0.0f, 1.0f, 0.0f));
-	Shape::activeCamera = &cam;
-	CameraTool camTrans(&cam);
+	cam.activate();
+//	CameraTool camTrans(&cam);
+
+	InteractiveCamera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+				lookat,
+				glm::vec3(0.0f, 0.0f, 1.0f));
+	cam2.activate();
+	cam2.cam->distanceToShape(&s);
+
+//	glm::vec3 los = pos;
+	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
+	Shape lineOfSight(2, GL_LINES);
+	lineOfSight.setVertices(pos_los);
 
 //	for (int i=0; i<10000; ++i){  
-	glutMainLoop();
+//	glutMainLoop();
 //	usleep(100);
 //	}
 
@@ -338,7 +362,6 @@ int main(int argc, char** argv)
 
   glBindVertexArray(0);
   glDeleteVertexArrays(1, &vao);
-
 
   return 0;
 }

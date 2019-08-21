@@ -11,6 +11,8 @@ using namespace std;
 //glm::mat4 projection(1.f);
 //glm::mat4 view(1.f); 
 
+
+
 void checkGLError(const char * file, int line){
 	GLenum err;
 	while((err = glGetError()) != GL_NO_ERROR){
@@ -57,7 +59,7 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp){
 	glm::vec3 pos0 = glm::vec3(glm::length(_position - _lookingAt),0.f,0.f);
 
 	worldUp = _worldUp;
-	lineOfSight = glm::normalize(-pos0);	// at pos0 (on x axis), looking at origin
+	lineOfSight = glm::normalize(0.f-pos0);	// at pos0 (on x axis), looking at origin
 	worldRt =  glm::normalize(glm::cross(lineOfSight, worldUp));
 	tx = ty = rx = ry = 0;
 	sc = 1;
@@ -97,7 +99,55 @@ void Camera::transform(){
   	view = glm::rotate(view, rx, worldRt);  // worldRt stays constant because Camera rotations are NOT incremental
   	view = glm::rotate(view, ry, worldUp);	// First Rotation along up axis 
 //	view = glm::translate(view, translation);
-	// TODO: Shapes list should be sorted here
+	
+	// Sort shapes by distance to newly transformed camera. 
+	// WARNING: This operation is expensive. Comment out this line if low graphics quality is required
+	if (Shape::activeCamera == this) this->sortShapes();
+
+}
+
+void Camera::activate(){
+	Shape::activeCamera = this;
+	
+	// Sort shapes by distance to newly activated camera
+	this->sortShapes();
+}
+
+
+float Camera::distanceToShape(Shape * s){
+	glm::mat4 invView = glm::inverse(view);
+	glm::vec3 camDir = -glm::column(invView, 2);
+	glm::vec3 camPos =  glm::column(invView, 3);
+	
+	glm::vec3 toCentroid = (s->getTransformedBBox0()+s->getTransformedBBox1())/2.f - camPos;
+	
+	float dist = glm::length(glm::dot(camDir, toCentroid));
+
+	return dist;
+//	cout << "LookAtDir: " << glm::to_string(camDir) << endl;  // 3rd Row is lookat DIRECTION
+//	cout << "Cam Pos: "       << glm::to_string(camPos) << endl;  // 4th Row is camera POSITION
+//	cout << "Shape Pos: "       << glm::to_string((s->getTransformedBBox0()+s->getTransformedBBox1())/2.f) << endl;  // 4th Row is camera POSITION
+//	cout << ">> Dist = " << dist << endl;	
+}
+
+void Camera::sortShapes(){
+	if (!glIsEnabled(GL_BLEND)) return; // No need of sorting if transparency is not enabled
+	
+	glm::mat4 invView = glm::inverse(view);
+	glm::vec3 camDir = -glm::column(invView, 2);	// 3rd column contains the camera DIRECTION (not the original lookAt position)
+	glm::vec3 camPos =  glm::column(invView, 3);	// 4th column contains the camera POSITION  (in world coordintes)
+	
+	Shape::allShapes.sort([invView, camDir, camPos](Shape* &s1, Shape* &s2){ 
+								glm::vec3 toCentroid1 = (s1->getTransformedBBox0()+s1->getTransformedBBox1())/2.f - camPos;
+								float dist1 = (glm::dot(camDir, toCentroid1));
+
+								glm::vec3 toCentroid2 = (s2->getTransformedBBox0()+s2->getTransformedBBox1())/2.f - camPos;
+								float dist2 = (glm::dot(camDir, toCentroid2));
+								
+//								cout << "distances = " << dist1 << ", " << dist2 << endl;
+								return dist1 > dist2; 
+						   });
+	
 }
 
 
@@ -117,7 +167,7 @@ GLuint loadShader(string filename, GLenum shader_type){
 
 
 list<Shape*> Shape::allShapes;
-Camera* Shape::activeCamera;
+Camera* Shape::activeCamera = NULL;
 
 Shape::Shape(int nverts, GLenum mode){
 	nVertices = nverts;
@@ -160,7 +210,8 @@ Shape::Shape(int nverts, GLenum mode){
 	
 	// sort the shapes by distance to camera, so that transparency is handled correctly. We are just sorting shapes, not individual triangles, and praying to god that thats good enough! 
 	// Sort shapes list so that newly inserted shape gets into the correct location.
-	allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) < min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
+	// allShapes.sort([](Shape* &s1, Shape* &s2){ return min(s1->bbox0.z,s1->bbox1.z) < min(s2->bbox0.z,s2->bbox1.z);}); // FIXME: sort by distance from camera rather than absolute z
+	if (activeCamera != NULL) activeCamera->sortShapes();
 }
 
 Shape::~Shape(){
@@ -198,11 +249,11 @@ Shape::~Shape(){
 }
 
 glm::vec3 Shape::getTransformedBBox0(){
-	return world*model*glm::vec4(bbox0, 1);
+	return world*model*glm::vec4(bbox0, 1.f);
 }
 
 glm::vec3 Shape::getTransformedBBox1(){
-	return world*model*glm::vec4(bbox1, 1);
+	return world*model*glm::vec4(bbox1, 1.f);
 }
 
 
@@ -210,10 +261,10 @@ void Shape::setVertices(float * verts){
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, 3*nVertices*sizeof(float), verts, GL_DYNAMIC_DRAW);
 
-	bbox0 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(1e20,1e20,1e20),
+	bbox0 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(1e20f,1e20f,1e20f),
 						[](const glm::vec3& p1, const glm::vec3& p2){ return glm::vec3(min(p1.x,p2.x), min(p1.y,p2.y), min(p1.z,p2.z));});
 
-	bbox1 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(-1e20,-1e20,-1e20),
+	bbox1 = accumulate((glm::vec3*)verts, (glm::vec3*)verts +nVertices, glm::vec3(-1e20f,-1e20f,-1e20f),
 						[](const glm::vec3& p1, const glm::vec3& p2){ return glm::vec3(max(p1.x,p2.x), max(p1.y,p2.y), max(p1.z,p2.z));});
 	
 	cout << "Shape bounding box: [" << bbox0.x << " " << bbox0.y << " " << bbox0.z << "] ["  
@@ -283,6 +334,7 @@ void Shape::setPointSize(float psize){
 	glUniform1f(loc, psize);
 	CHECK_GL_ERROR();
 }
+
 
 void Shape::render(){
 
