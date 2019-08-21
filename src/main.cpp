@@ -114,10 +114,6 @@ class InteractiveCamera : public Tool{
 		cam->activate();
 	}
 	
-//	InteractiveCamera(Camera * C) : Tool(){
-//		cam = C;
-//	}
-
 	virtual void onClick(int button, int state, int x, int y){
 //		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
 		captureClick(button, state, x,y);		
@@ -130,7 +126,7 @@ class InteractiveCamera : public Tool{
 			cam->sc *= 1-0.1;
 		}
 
-//		cam->transform();
+		cam->transform();
 		
 		glutPostRedisplay();
 	}
@@ -330,29 +326,25 @@ int main(int argc, char** argv)
 	glm::vec3 lookat(2.0f, 2.0f, 0.0f);
 
 	
-//	cam.projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
 	InteractiveCamera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				lookat,
 				glm::vec3(0.0f, 0.0f, 1.0f));
-//	Camera cam(glm::vec3(0.0f, 0.0f, 2.0f),  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-//				glm::vec3(0.0f, 0.0f, 0.0f), 
-//				glm::vec3(0.0f, 1.0f, 0.0f));
 	cam.activate();
-//	CameraTool camTrans(&cam);
 
 	InteractiveCamera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				lookat,
-				glm::vec3(0.0f, 0.0f, 1.0f));
+				glm::vec3(0.0f, 1.0f, 0.0f));
 	cam2.activate();
-	cam2.cam->distanceToShape(&s);
+
 
 //	glm::vec3 los = pos;
 	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
 	Shape lineOfSight(2, GL_LINES);
 	lineOfSight.setVertices(pos_los);
 
+
 //	for (int i=0; i<10000; ++i){  
-//	glutMainLoop();
+	glutMainLoop();
 //	usleep(100);
 //	}
 
