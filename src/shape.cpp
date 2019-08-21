@@ -135,17 +135,18 @@ void Camera::sortShapes(){
 	
 	glm::mat4 invView = glm::inverse(view);
 	glm::vec3 camDir = -glm::column(invView, 2);	// 3rd column contains the camera DIRECTION (not the original lookAt position)
+//	cout << glm::to_string(camDir) << endl;
 	glm::vec3 camPos =  glm::column(invView, 3);	// 4th column contains the camera POSITION  (in world coordintes)
 	
 	Shape::allShapes.sort([invView, camDir, camPos](Shape* &s1, Shape* &s2){ 
-								glm::vec3 toCentroid1 = (s1->getTransformedBBox0()+s1->getTransformedBBox1())/2.f - camPos;
+								glm::vec3 toCentroid1 = camPos - (s1->getTransformedBBox0()+s1->getTransformedBBox1())/2.f;
 								float dist1 = (glm::dot(camDir, toCentroid1));
 
-								glm::vec3 toCentroid2 = (s2->getTransformedBBox0()+s2->getTransformedBBox1())/2.f - camPos;
+								glm::vec3 toCentroid2 = camPos - (s2->getTransformedBBox0()+s2->getTransformedBBox1())/2.f;
 								float dist2 = (glm::dot(camDir, toCentroid2));
 								
 //								cout << "distances = " << dist1 << ", " << dist2 << endl;
-								return dist1 > dist2; 
+								return dist1 < dist2; 
 						   });
 	
 }

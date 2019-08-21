@@ -331,10 +331,11 @@ int main(int argc, char** argv)
 				glm::vec3(0.0f, 0.0f, 1.0f));
 	cam.activate();
 
-	InteractiveCamera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-				lookat,
-				glm::vec3(0.0f, 1.0f, 0.0f));
-	cam2.activate();
+	// FIXME: Creating a new tool after activating camera disables camera rotations, because thats the first tool 
+//	InteractiveCamera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+//				lookat,
+//				glm::vec3(0.0f, 1.0f, 0.0f));
+//	cam2.activate();
 
 
 //	glm::vec3 los = pos;
