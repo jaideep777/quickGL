@@ -5,242 +5,25 @@
 #include <unistd.h>
 #include <functional>
 #include <algorithm>
+#include "../include/glinit.h"
 #include "../include/shape.h"
+#include "../include/camera.h"
+#include "../include/tool.h"
 using namespace std;
 
 //extern list <Shape*> allShapes;
 //extern glm::mat4 projection;
 //extern glm::mat4 view; 
 
-GLuint vao;
-
-int width = 320;
-int height = 240;
-
-
-// SimpleGL follows the principle of creating all objects (including cameras) aligned to axes and then using the matrices to get then in position
-
-class Tool{
-	protected:
-	bool lClick, mClick, rClick;	// whether any mouse button was clicked
-	bool wheelUp, wheelDown;
-	int x0, y0;						// mouse coordinates when any button was clicked
-	
-	public:
-	Tool(){
-		mClick = lClick = rClick = 0;
-		activeTools.push_front(this);
-		cout << "Constructing tool #" << activeTools.size() << ", " << activeTools.size() << " in list" << endl;
-	}
-
-	virtual ~Tool(){
-		try{
-			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
-			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
-			activeTools.erase(it);
-			cout << "Destroying tool, " << activeTools.size() << " left in list." << endl;
-		}
-		catch(string s){ 
-			cout << "FATAL ERROR: " << s << endl; 
-		}
-	}
-	
-
-	void activate(){
-		// bring to front of queue
-		try{
-			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
-			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
-			activeTools.splice(activeTools.begin(), activeTools, it);	// erase *it from current location (it) and put it at begin()
-		}
-		catch(string s){ 
-			cout << "FATAL ERROR: " << s << endl; 
-		}
-	}
-
-	void captureClick(int button, int state, int x, int y){
-		if (button == GLUT_LEFT_BUTTON){
-			if (state == GLUT_DOWN){
-				cout << "L Click captured by Tool at: " << x << " " << y << endl;
-				lClick = true;
-				x0 = x;
-				y0 = y;
-			}
-			else{
-				lClick = false;
-			} 
-		}
-
-		if (button == GLUT_MIDDLE_BUTTON){
-			if (state == GLUT_DOWN){
-				cout << "M Click captured by Tool at: " << x << " " << y << endl;
-				mClick = true;
-				x0 = x;
-				y0 = y;
-			}
-			else{
-				mClick = false;
-			} 
-		}
-
-		if (button == GLUT_RIGHT_BUTTON){
-			if (state == GLUT_DOWN){
-				cout << "R Click captured by Tool at: " << x << " " << y << endl;
-				rClick = true;
-				x0 = x;
-				y0 = y;
-			}
-			else{
-				rClick = false;
-			} 
-
-		}
-	}
-	
-	virtual void onClick(int button, int state, int x, int y){
-		captureClick(button, state, x,y);		
-	}
-	
-	virtual void onMouseMove(int x, int y){};
-	
-	static list <Tool*> activeTools;
-};
-
-list <Tool*> Tool::activeTools;
-
-
-class InteractiveCameraTool : public Tool{
-	public:
-//	Camera * cam;
-
-	public:
-//	InteractiveCamera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _Up) : Tool() {
-//		cout << "Constructing ICam" << endl;
-//		cam = new Camera(_position, _lookingAt, _Up);
-//	}
-
-//	virtual ~InteractiveCamera(){
-//		delete cam;
-//		cout << "Destroying ICam" << endl;
-//	}
-	
-//	void activate(){
-//		cam->activate();
-//		// bring to front
-//		try{
-//			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
-//			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
-//			cout << "Bringing ICam to front. List size after operation: " << activeTools.size() << endl; 
-//			activeTools.splice(activeTools.begin(), activeTools, it);
-//		}
-//		catch(string s){ 
-//			cout << "FATAL ERROR: " << s << endl; 
-//		}
-
-//		
-//	}
-	
-	virtual void onClick(int button, int state, int x, int y){
-//		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
-		captureClick(button, state, x,y);		
-
-		if (button == 3 && state == GLUT_DOWN){	// wheel down / pinch out
-			Shape::activeCamera->sc *= 1+0.1;
-		
-		}
-		if (button == 4 && state == GLUT_DOWN){	// wheel up / pinch in
-			Shape::activeCamera->sc *= 1-0.1;
-		}
-
-		Shape::activeCamera->transform();
-		
-		glutPostRedisplay();
-	}
-	
-		
-	virtual void onMouseMove(int x, int y){
-		float h = glutGet(GLUT_WINDOW_HEIGHT);
-		float w = glutGet(GLUT_WINDOW_WIDTH);
-
-		if (lClick){
-			Shape::activeCamera->rx += 0.02*(y - y0);
-			Shape::activeCamera->ry += 0.02*(x - x0);
-		}
-//		if (rClick){
-//			float r = (y - y0)/h;
-//			cam->sc *= 1+r;
-//		}
-		if (mClick || rClick){
-			Shape::activeCamera->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
-			Shape::activeCamera->tx += (w/250.f)*(x - x0)/w;
-		}
-		y0 = y;
-		x0 = x;
-	
-		Shape::activeCamera->transform();
-		
-		glutPostRedisplay();
-	}
-	
-};
 
 
 
 	
-void onDisplay(void)
-{
-
-
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	for (auto it : Shape::allShapes) it->render();	
-	  
-  glutSwapBuffers();
-}
-
-void onResize(int w, int h)
-{
-  width = w; height = h;
-  glViewport(0, 0, (GLsizei)w, (GLsizei)h);
-}
-
-
-void onClick(int button, int state, int x, int y){
-	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
-}
-
-void onMouseMove(int x, int y){
-	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
-}
 
 int main(int argc, char** argv)
 {
 
-  glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	
-  glutInitWindowSize(width, height);
-
-  glutCreateWindow("mini");
-
-	
- 	glEnable(GL_BLEND);
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-//	glBlendFunc( GL_ONE, GL_ONE );
-
-	glEnable(GL_DEPTH_TEST);
-
-    glEnable(GL_PROGRAM_POINT_SIZE);
-
-  glewExperimental = GL_TRUE;
-  glewInit();
-
-
-  // BUFFERS etc
-
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-
+	initSimpleGL(argc, argv);
 	
 	float pos3[] = {0,0,0, 10,0,0, 0,0,0, 0,10,0, 0,0,0, 0,0,10};
 	float col3[] = {1,0,0, 0.5,
@@ -292,10 +75,6 @@ int main(int argc, char** argv)
 
 
 
-  glutDisplayFunc(onDisplay);
-  glutReshapeFunc(onResize);
-	glutMouseFunc(onClick);
-	glutMotionFunc(onMouseMove);
 	
 	
 //	registerCallbacks(b);
@@ -377,16 +156,14 @@ int main(int argc, char** argv)
 
 
 //	for (int i=0; i<10000; ++i){  
-	glutMainLoop();
+//	glutMainLoop();
 //	usleep(100);
 //	}
 
 //	s.deleteTexture();
 //	delete s;
 	
-
-  glBindVertexArray(0);
-  glDeleteVertexArrays(1, &vao);
+	closeSimpleGL();
 
   return 0;
 }

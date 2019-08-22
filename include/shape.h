@@ -14,30 +14,7 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-class Shape;
-
-class Camera{
-	public:
-//	glm::vec3 position, lookingAt;
-	glm::vec3 camUp, camRt;
-	glm::mat4 projection, view;
-	glm::vec3 lineOfSight;
-	glm::vec3 translation;
-
-	glm::mat4 projection0, view0;
-	float tx, ty, rx, ry, sc;
-	
-	public:
-	Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp);
-	glm::mat4 matrix();
-	
-	void  transform();
-	void  activate();
-	float distanceToShape(Shape * s);
-	void  sortShapes();
-
-};
-
+class Camera;
 
 class Shape{
 //	friend class Camera;	// make Camera friend to give access to activeCamera
