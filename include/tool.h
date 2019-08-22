@@ -27,13 +27,5 @@ class Tool{
 };
 
 
-class Camera{
-	public:
-	glm::vec3 worldUpAxis;
-	glm::mat4 projection, view;
-	
-	public:
-	Camera(glm::vec3 position, glm::vec3 lookingAt, glm::vec3 upAxis);
-	projectPerspective();
-	projectOrtho();
-}
+
+

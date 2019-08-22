@@ -19,7 +19,7 @@ class Shape;
 class Camera{
 	public:
 //	glm::vec3 position, lookingAt;
-	glm::vec3 worldUp, worldRt;
+	glm::vec3 camUp, camRt;
 	glm::mat4 projection, view;
 	glm::vec3 lineOfSight;
 	glm::vec3 translation;
@@ -40,7 +40,7 @@ class Camera{
 
 
 class Shape{
-	friend class Camera;
+//	friend class Camera;	// make Camera friend to give access to activeCamera
 	public:
 	int nVertices;
 	int nElements;
@@ -62,7 +62,7 @@ class Shape{
 	public:
 	static std::list<Shape*> allShapes;	// a list of all existing shapes 
 	
-	protected:
+	public:
 	static Camera* activeCamera;
 	
 	public:

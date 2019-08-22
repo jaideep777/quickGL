@@ -45,6 +45,19 @@ class Tool{
 		}
 	}
 	
+
+	void activate(){
+		// bring to front of queue
+		try{
+			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
+			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
+			activeTools.splice(activeTools.begin(), activeTools, it);	// erase *it from current location (it) and put it at begin()
+		}
+		catch(string s){ 
+			cout << "FATAL ERROR: " << s << endl; 
+		}
+	}
+
 	void captureClick(int button, int state, int x, int y){
 		if (button == GLUT_LEFT_BUTTON){
 			if (state == GLUT_DOWN){
@@ -95,38 +108,51 @@ class Tool{
 
 list <Tool*> Tool::activeTools;
 
-class InteractiveCamera : public Tool{
+
+class InteractiveCameraTool : public Tool{
 	public:
-	Camera * cam;
+//	Camera * cam;
 
 	public:
-	InteractiveCamera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _worldUp) : Tool() {
-		cout << "Constructing ICam" << endl;
-		cam = new Camera(_position, _lookingAt, _worldUp);
-	}
+//	InteractiveCamera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _Up) : Tool() {
+//		cout << "Constructing ICam" << endl;
+//		cam = new Camera(_position, _lookingAt, _Up);
+//	}
 
-	virtual ~InteractiveCamera(){
-		delete cam;
-		cout << "Destroying ICam" << endl;
-	}
+//	virtual ~InteractiveCamera(){
+//		delete cam;
+//		cout << "Destroying ICam" << endl;
+//	}
 	
-	void activate(){
-		cam->activate();
-	}
+//	void activate(){
+//		cam->activate();
+//		// bring to front
+//		try{
+//			list<Tool*>::iterator it = find(activeTools.begin(), activeTools.end(), this);
+//			if (it == activeTools.end()) throw string("Tool destructor could not find tool in active list!");
+//			cout << "Bringing ICam to front. List size after operation: " << activeTools.size() << endl; 
+//			activeTools.splice(activeTools.begin(), activeTools, it);
+//		}
+//		catch(string s){ 
+//			cout << "FATAL ERROR: " << s << endl; 
+//		}
+
+//		
+//	}
 	
 	virtual void onClick(int button, int state, int x, int y){
 //		cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
 		captureClick(button, state, x,y);		
 
 		if (button == 3 && state == GLUT_DOWN){	// wheel down / pinch out
-			cam->sc *= 1+0.1;
+			Shape::activeCamera->sc *= 1+0.1;
 		
 		}
 		if (button == 4 && state == GLUT_DOWN){	// wheel up / pinch in
-			cam->sc *= 1-0.1;
+			Shape::activeCamera->sc *= 1-0.1;
 		}
 
-		cam->transform();
+		Shape::activeCamera->transform();
 		
 		glutPostRedisplay();
 	}
@@ -137,21 +163,21 @@ class InteractiveCamera : public Tool{
 		float w = glutGet(GLUT_WINDOW_WIDTH);
 
 		if (lClick){
-			cam->rx += 0.02*(y - y0);
-			cam->ry += 0.02*(x - x0);
+			Shape::activeCamera->rx += 0.02*(y - y0);
+			Shape::activeCamera->ry += 0.02*(x - x0);
 		}
 //		if (rClick){
 //			float r = (y - y0)/h;
 //			cam->sc *= 1+r;
 //		}
 		if (mClick || rClick){
-			cam->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
-			cam->tx += (w/250.f)*(x - x0)/w;
+			Shape::activeCamera->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
+			Shape::activeCamera->tx += (w/250.f)*(x - x0)/w;
 		}
 		y0 = y;
 		x0 = x;
 	
-		cam->transform();
+		Shape::activeCamera->transform();
 		
 		glutPostRedisplay();
 	}
@@ -323,21 +349,27 @@ int main(int argc, char** argv)
 
 
 	glm::vec3 pos(2.0f, 2.0f, 2.0f);
-	glm::vec3 lookat(2.0f, 2.0f, 0.0f);
+	glm::vec3 lookat(0.5f, 0.5f, 0.0f);
 
 	
-	InteractiveCamera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+	Camera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
 				lookat,
 				glm::vec3(0.0f, 0.0f, 1.0f));
 	cam.activate();
 
-	// FIXME: Creating a new tool after activating camera disables camera rotations, because thats the first tool 
-//	InteractiveCamera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-//				lookat,
-//				glm::vec3(0.0f, 1.0f, 0.0f));
+	// FIXME: Creating a new unactivated Camera after disables the first camera as it occupies the head position!   
+	Camera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
+				lookat,
+				glm::vec3(0.0f, 1.0f, 0.0f));
 //	cam2.activate();
 
+	InteractiveCameraTool camMover;
 
+	cam2.activate();
+	InteractiveCameraTool camMover2;
+	
+	cam.activate();
+	
 //	glm::vec3 los = pos;
 	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
 	Shape lineOfSight(2, GL_LINES);
