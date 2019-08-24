@@ -1,18 +1,12 @@
-#ifndef SIMPLEGL_SHAPE_H
-#define SIMPLEGL_SHAPE_H
+#ifndef QUICKGL_SHAPE_H_
+#define QUICKGL_SHAPE_H_
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <list>
 #include <string>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_access.hpp>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/vector_angle.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 class Camera;
 
@@ -38,16 +32,11 @@ class Shape{
 	
 	public:
 	static std::list<Shape*> allShapes;	// a list of all existing shapes 
-	
-	public:
 	static Camera* activeCamera;
 	
 	public:
 	Shape(int nverts, GLenum mode);
 	virtual ~Shape();
-
-	glm::vec3 getTransformedBBox0();
-	glm::vec3 getTransformedBBox1();	
 
 	void setVertices(float * verts);
 	void setColors(float * cols);
@@ -60,7 +49,12 @@ class Shape{
 	
 	virtual void render();
 	
+	glm::vec3 getTransformedBBox0();
+	glm::vec3 getTransformedBBox1();	
+
 
 };
 
 #endif
+
+

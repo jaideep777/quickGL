@@ -1,11 +1,23 @@
 #include "../include/shape.h"
-#include "../include/camera.h"
-#include "../include/glinit.h"
+
 #include <fstream>
 #include <string>
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_access.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/string_cast.hpp>
+
+#include "../include/camera.h"
+#include "../include/glinit.h"
+
+
 using namespace std;
 
 
@@ -33,8 +45,8 @@ Shape::Shape(int nverts, GLenum mode){
 	useColor = useTexture = useElements = false;
 	model = world = glm::mat4(1.f);
 	
-	vertexShader = loadShader("src/shaders/shader_vertex_tex.glsl", GL_VERTEX_SHADER);
-	fragmentShader = loadShader("src/shaders/shader_fragment_tex.glsl", GL_FRAGMENT_SHADER);
+	vertexShader = loadShader("shaders/shader_vertex.glsl", GL_VERTEX_SHADER);
+	fragmentShader = loadShader("shaders/shader_fragment.glsl", GL_FRAGMENT_SHADER);
 	CHECK_GL_ERROR();
 
 	program = glCreateProgram();
@@ -169,7 +181,7 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 
 }
 
-
+// FIXME: use the PVM matrices to set extent
 void Shape::autoExtent(){
 	glm::vec3 size = bbox1 - bbox0;
 	glm::vec3 centroid = (bbox0+bbox1)/2.f;

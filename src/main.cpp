@@ -1,30 +1,55 @@
 #include <iostream>
-#include <string>
-#include <fstream>
-#include <list>
-#include <unistd.h>
-#include <functional>
-#include <algorithm>
-#include "../include/glinit.h"
-#include "../include/shape.h"
-#include "../include/camera.h"
-#include "../include/tool.h"
+#include <vector>
+
+#include "../include/quickgl.h"
 using namespace std;
 
-//extern list <Shape*> allShapes;
-//extern glm::mat4 projection;
-//extern glm::mat4 view; 
-
-
-
 
 	
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv){
 
-	initSimpleGL(argc, argv);
+	// Initialize QuickGL (OpenGL initializations)
+	initQuickGL(argc, argv);
 	
+	// Create a Controller to rotate/pan/zoom the view with mouse/touch
+	CameraController c;
+
+	// Create a Camera
+	glm::vec3 pos(2.0f, 2.0f, 2.0f);
+	glm::vec3 lookat(0.5f, 0.5f, 0.0f);
+
+	Camera cam(pos, lookat, glm::vec3(0.0f, 0.0f, 1.0f));
+	cam.activate();
+
+	// Create a rainbow colour palette of 1000 colours
+	Palette palette(1000);
+	palette.createRainbow(); 
+
+
+	// Point-cloud Analysis goes here
+	
+
+	// Create a (Demo) Point-Cloud
+	vector <float> points(3*100000);
+	for (int i=0; i<10000; ++i){
+		points[3*i+0] = float(rand())/RAND_MAX;
+		points[3*i+1] = float(rand())/RAND_MAX;
+		points[3*i+2] = float(rand())/RAND_MAX;
+	}
+	vector <float> cols_pts = palette.mapValues(points.data(), 100000, 3, 2);
+	
+	// Create a Shape for point-cloud
+	Shape ptcld(100000, GL_POINTS);
+	ptcld.setVertices(points.data());
+	ptcld.setColors(cols_pts.data());
+	ptcld.autoExtent();	// Centers the point-cloud at origin
+
+	
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	//       OTHER QUICKGL TESTS
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 	float pos3[] = {0,0,0, 10,0,0, 0,0,0, 0,10,0, 0,0,0, 0,0,10};
 	float col3[] = {1,0,0, 0.5,
 				    1,0,0, 0.5,
@@ -71,15 +96,8 @@ int main(int argc, char** argv)
 	Shape axis(6, GL_LINES);
 	axis.setVertices(pos3);
 	axis.setColors(col3);
+//	axis.autoExtent();
 //	axis.applyTexture(UVs, pixels2, 2,2);
-
-
-
-	
-	
-//	registerCallbacks(b);
-
-//	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_CONTINUE_EXECUTION);
 
 
 	GLfloat vertices_f[] = {
@@ -127,27 +145,8 @@ int main(int argc, char** argv)
 		  						    << b1.x << " " << b1.y << " " << b1.z << "]" << endl;
 
 
-	glm::vec3 pos(2.0f, 2.0f, 2.0f);
-	glm::vec3 lookat(0.5f, 0.5f, 0.0f);
 
 	
-	Camera cam(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-				lookat,
-				glm::vec3(0.0f, 0.0f, 1.0f));
-	cam.activate();
-
-	// FIXME: Creating a new unactivated Camera after disables the first camera as it occupies the head position!   
-	Camera cam2(pos,  // glm::vec3(1.0f, 0.5f, 2.0f), // 
-				lookat,
-				glm::vec3(0.0f, 1.0f, 0.0f));
-//	cam2.activate();
-
-	InteractiveCameraTool camMover;
-
-	cam2.activate();
-	InteractiveCameraTool camMover2;
-	
-	cam.activate();
 	
 //	glm::vec3 los = pos;
 	float pos_los[] = {pos.x, pos.y, pos.z, lookat.x, lookat.y, lookat.z};
@@ -156,14 +155,14 @@ int main(int argc, char** argv)
 
 
 //	for (int i=0; i<10000; ++i){  
-//	glutMainLoop();
+	glutMainLoop();
 //	usleep(100);
 //	}
 
 //	s.deleteTexture();
 //	delete s;
 	
-	closeSimpleGL();
+	closeQuickGL();
 
   return 0;
 }

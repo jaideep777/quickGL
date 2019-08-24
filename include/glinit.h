@@ -1,9 +1,9 @@
-#ifndef SIMPLEGL_GL_INIT_H
-#define SIMPLEGL_GL_INIT_H
+#ifndef QUICKGL_GL_INIT_H_
+#define QUICKGL_GL_INIT_H_
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <string>
-using namespace std;
 
 #define CHECK_GL_ERROR() checkGLError(__FILE__, __LINE__)
 
@@ -14,10 +14,10 @@ extern int height;
 void checkGLError(const char * file, int line);
 void printStatus(const char *step, GLuint context, GLuint status);
 
-GLuint loadShader(string filename, GLenum shader_type);
+GLuint loadShader(std::string filename, GLenum shader_type);
 
-void initSimpleGL(int argc, char** argv);
-void closeSimpleGL();
+void initQuickGL(int argc, char** argv);
+void closeQuickGL();
 
 void onDisplay(void);
 

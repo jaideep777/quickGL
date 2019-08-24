@@ -1,9 +1,9 @@
-#ifndef SIMPLEGL_CAMERA_H
-#define SIMPLEGL_CAMERA_H
+#ifndef QUICKGL_CAMERA_H_
+#define QUICKGL_CAMERA_H_
 
 #include <glm/glm.hpp>
 
-class Shape;
+#include "../include/shape.h"
 
 class Camera{
 	public:

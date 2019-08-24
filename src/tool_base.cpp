@@ -1,5 +1,8 @@
-#include  "../include/tool.h"
+#include  "../include/tool_base.h"
+
 #include <algorithm>
+
+#include "../include/camera.h"
 using namespace std;
 
 
@@ -99,62 +102,6 @@ void Tool::onMouseMove(int x, int y){
 
 
 	
-void InteractiveCameraTool::onClick(int button, int state, int x, int y){
-//	cout << "Clicked by Tool::CameraTransformer at: " << x << " " << y << endl;
-	captureClick(button, state, x,y);		
-
-	if (button == 3 && state == GLUT_DOWN){	// wheel down / pinch out
-		Shape::activeCamera->sc *= 1+0.1;
-	
-	}
-	if (button == 4 && state == GLUT_DOWN){	// wheel up / pinch in
-		Shape::activeCamera->sc *= 1-0.1;
-	}
-
-	Shape::activeCamera->transform();
-	
-	glutPostRedisplay();
-}
-	
-		
-void InteractiveCameraTool::onMouseMove(int x, int y){
-	float h = glutGet(GLUT_WINDOW_HEIGHT);
-	float w = glutGet(GLUT_WINDOW_WIDTH);
-
-	if (lClick){
-		Shape::activeCamera->rx += 0.02*(y - y0);
-		Shape::activeCamera->ry += 0.02*(x - x0);
-	}
-//	if (rClick){
-//		float r = (y - y0)/h;
-//		cam->sc *= 1+r;
-//	}
-	if (mClick || rClick){
-		Shape::activeCamera->ty -= (h/250.f)*(y - y0)/h;	// -= because y is measured from top
-		Shape::activeCamera->tx += (w/250.f)*(x - x0)/w;
-	}
-	y0 = y;
-	x0 = x;
-
-	Shape::activeCamera->transform();
-	
-	glutPostRedisplay();
-}
-
-//	InteractiveCamera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _Up) : Tool() {
-//		cout << "Constructing ICam" << endl;
-//		cam = new Camera(_position, _lookingAt, _Up);
-//	}
-
-//	virtual ~InteractiveCamera(){
-//		delete cam;
-//		cout << "Destroying ICam" << endl;
-//	}
-
-
-
-
-
 
 
 

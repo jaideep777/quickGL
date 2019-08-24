@@ -1,5 +1,5 @@
-#ifndef SIMPLEGL_TOOL_H
-#define SIMPLEGL_TOOL_H
+#ifndef QUICKGL_TOOL_BASE_H_
+#define QUICKGL_TOOL_BASE_H_
 
 #include <list>
 #include <iostream>
@@ -7,7 +7,6 @@
 #include <GL/glut.h>
 
 #include <glm/glm.hpp>
-#include "../include/camera.h"
 #include "../include/shape.h"
 
 //class Tool{
@@ -58,14 +57,6 @@ class Tool{
 };
 
 
-
-class InteractiveCameraTool : public Tool{
-	public:
-
-	virtual void onClick(int button, int state, int x, int y);
-	virtual void onMouseMove(int x, int y);
-	
-};
 
 
 

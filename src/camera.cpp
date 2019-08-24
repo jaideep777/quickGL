@@ -1,5 +1,4 @@
 #include "../include/camera.h"
-#include "../include/shape.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,22 +8,11 @@
 #include <glm/gtx/vector_angle.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "../include/shape.h"
+
 using namespace std;
 
 // DONE: Transform camera after construction of axis aligned one to match specs
-//Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _camUp){
-//	position = _position;
-//	lookingAt = _lookingAt;
-//	camUp = _camUp;
-//	
-//	view0 = view = glm::lookAt(position, lookingAt, camUp);
-//	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
-//	lineOfSight = glm::normalize(lookingAt - position);
-//	tx = ty = rx = ry = 0;
-//	sc = 1;
-//}
-
-
 // Create axis-aligned camera, then rotate it to desired specs.
 // Having the camera axis-aligned creates predictable camera panning independent of camera orientation
 Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _Up){

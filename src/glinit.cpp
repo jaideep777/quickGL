@@ -1,13 +1,20 @@
 #include "../include/glinit.h"
-#include "../include/shape.h"
-#include "../include/tool.h"
+
 #include <iostream>
+
+#include "../include/shape.h"
+#include "../include/tool_base.h"
+
 using namespace std;
 
 GLuint vao;
 int width = 320;
 int height = 240;
 
+
+// TODO: Should there be a GLInterface class that controls the globals? 
+//       e.g. It will store the active shapes list and active tools list? 
+// 		 Maybe not?
 
 void checkGLError(const char * file, int line){
 	GLenum err;
@@ -61,7 +68,7 @@ void onMouseMove(int x, int y){
 }
 
 
-void initSimpleGL(int argc, char** argv){
+void initQuickGL(int argc, char** argv){
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	
@@ -93,7 +100,7 @@ void initSimpleGL(int argc, char** argv){
 }
 
 
-void closeSimpleGL(){
+void closeQuickGL(){
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &vao);
 
