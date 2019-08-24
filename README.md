@@ -5,7 +5,10 @@ QuickGL lets you instantly add graphical visualizations to your project with jus
 
 ## Getting started
 
-For a basic visualization, follow these steps:
+To create a basic visualization, follow the simple steps in the code below. These steps will automagically:
+1) Create a window and draw all created shapes in it.
+2) Create a camera that you can zoom with scroll wheel, rotate with left click, and pan with middle or right click. On touch screens, touch to rotate and pinch to zoom. 
+3) Perform all OpenGL initializations and allocations behind the scenes 
 
 ````C++
 // 1. Initialize QuickGL (OpenGL initializations)
@@ -37,11 +40,15 @@ closeQuickGL();
 
 ````
 
-These steps will automagically create a window and draw all created shapes in it. With the camera controller created in Step 2, you can zoom with scroll wheel, rotate with left click, and pan with middle or right click. On touch screens, touch to rotate and pinch to zoom. See below for examples of `Shapes`.
+
 
 ## Compilation
 
 Include the contents of the QuickGL `src` and `include` folders in your respective project folders. Compile each file into an object file and link with the objects of your project.   
+
+## Extending QuickGL for more functionality
+
+All classes (`Shape`, `Camera`, and `Tool`) are extendable. Custom functions for Mouse/Keyboard input can be set by extending the `Tool` class and defining the `onClick()` and `onMouseMove()` functions.
 
 ## Shape Examples
 
@@ -75,9 +82,9 @@ ptcld.autoExtent();	// Center the point-cloud at origin
 float pts[] = {1,1, 0,1, 0,0, 1,0}
 float UVs[] = {1,1, 0,1, 0,0, 1,0}
 int elements[] = {0,1,2,2,3,0}
-unsigned char image[] = {0, 0,255,255, 
+unsigned char image[] = {0, 0,255,255, 	
 			 0, 255, 0,255,
-			 255,0,0,255,
+			 255,0,0,255,    
 			 255,255,255,255}; // a sample 2x2 image of 4 pixels, but this could be a real image
 			 
 Shape s(4, GL_TRIANGLES);
