@@ -24,7 +24,8 @@ class Camera{
 	void  activate();
 	float distanceToShape(Shape * s);
 	void  sortShapes();
-
+	
+	virtual void onResize(int w, int h);
 };
 
 

@@ -16,6 +16,7 @@ class Palette{
 	void createRamp(glm::vec4 start, glm::vec4 end);	
 	void print();
 	std::vector <float> mapValues(float * v, int nval, int stride = 1, int offset = 0, float vmin = 1e20, float vmax = 1e20);
+	std::vector <unsigned char> mapValues_byte(float * v, int nval, int stride = 1, int offset = 0, float vmin = 1e20, float vmax = 1e20);
 };
 
 

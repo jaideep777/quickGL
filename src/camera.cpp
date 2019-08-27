@@ -92,6 +92,7 @@ float Camera::distanceToShape(Shape * s){
 //	cout << ">> Dist = " << dist << endl;	
 }
 
+
 void Camera::sortShapes(){
 	if (!glIsEnabled(GL_BLEND)) return; // No need of sorting if transparency is not enabled
 	
@@ -112,4 +113,13 @@ void Camera::sortShapes(){
 						   });
 	
 }
+
+
+void Camera::onResize(int w, int h){
+	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	projection = glm::perspective(glm::radians(90.0f), float(w) / h, 0.1f, 1000.0f);
+}
+
+
+
 

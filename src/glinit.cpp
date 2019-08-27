@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "../include/shape.h"
+#include "../include/camera.h"
 #include "../include/tool_base.h"
 
 using namespace std;
@@ -53,8 +54,8 @@ void onDisplay(void){
 
 
 void onResize(int w, int h){
-	width = w; height = h;
-	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+//	width = w; height = h;
+	Shape::activeCamera->onResize(w,h); //glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
 

@@ -156,4 +156,45 @@ vector <float> Palette::mapValues(float* v, int nval, int stride, int offset, fl
 	return cols;
 }
 
+// WORKS for 2D and 3D
+vector <unsigned char> Palette::mapValues_byte(float* v, int nval, int stride, int offset, float vmin, float vmax){
+	vector <unsigned char> cols(4*nval);
+	
+	float min_val = v[0], max_val = v[0];
+//	double mean = v[0];
+	for (int i=1; i < nval; ++i){
+		min_val = min(min_val, v[stride*i+offset]);
+		max_val = max(max_val, v[stride*i+offset]);
+//		mean += v[stride*i+offset];
+	}
+//	mean /= nval;
+	
+	if (vmin != 1e20f) min_val = vmin; 
+	if (vmax != 1e20f) max_val = vmax;
+
+	cout << "minmax:" <<  min_val << " " << max_val << endl;
+//	cout << "mean:" <<  mean << endl;
+//	colMax = max(fabs(colMax), fabs(colMin));
+//	cout << "nCol = " << nCol << ", colMax = " << colMax << ", colMin = " << colMin << '\n';
+	for (int i=0; i < nval; ++i) {
+		glm::vec4 c;
+		int colID = (v[stride*i+offset] - min_val)/(max_val-min_val)*(n-1);
+//		cout << v[i*stride+offset] << endl;
+//		cout << "colid = " << colID << endl;
+		if (colID < 0 || colID > n-1){
+			cols[4*i+0] = 0;	// if color is out of range, return black
+			cols[4*i+1] = 0;
+			cols[4*i+2] = 0;
+			cols[4*i+3] = 0;
+		}
+		else{
+			cols[4*i+0] = 255*colors[colID].r;	// else return color from palette
+			cols[4*i+1] = 255*colors[colID].g;
+			cols[4*i+2] = 255*colors[colID].b;
+			cols[4*i+3] = 255*colors[colID].a;
+		}
+	}
+	return cols;
+}
+
 

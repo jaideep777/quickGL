@@ -46,6 +46,7 @@ class Shape{
 
 	void setShaderVariable(std::string s, glm::mat4 f);
 	void setPointSize(float psize);
+	void setTextureFilters(GLint minFilter, GLint magFilter);
 	
 	virtual void render();
 	
