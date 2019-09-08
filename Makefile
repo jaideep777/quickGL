@@ -1,58 +1,109 @@
-# MAKEFILE FOR CUDA
+# makefile for libgsm
 
-#-------------------------------------------------------------------------------
-# executable name
-TARGET := 1
+TARGET = libquickgl
+VERSION = 
+LIBPATH = #-L/usr/local/netcdf-cxx-legacy/lib -L/usr/local/cuda/lib64	# Netcdf-c++ libaray path
+INCPATH = #-I/usr/local/netcdf-cxx-legacy/include -I/usr/local/netcdf-c/include -I/usr/local/cuda/include  # need paths to netcdf-c as well as c++ includes
+LDFLAGS =  
+CPPFLAGS = -O3 -std=c++11 -fPIC -Wall -Wno-unused-variable
+CUDAFLAGS = -std=c++11 -Xcompiler -fPIC -arch=sm_35 -Wno-deprecated-gpu-targets
 
-# files
-CCFILES  :=  $(wildcard src/*.cpp) 
+LIBS = 
+#LIBS += -lnetcdf_c++ 
+#LIBS += -lgsl -lgslcblas 
+LIBS += -lGL -lglut -lGLU -lGLEW
 
-# ------------------------------------------------------------------------------
+CUDA_LIBS = #-lcudart -lcurand -lcufft
 
-# paths
-#CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
+SOURCEDIR = src
+CUDA_SOURCEDIR = src_cuda
+BUILDDIR = build
+OUTLIBPATH = lib
+INSTALLDIR = 
 
-# compilers
+SOURCES = $(wildcard $(SOURCEDIR)/*.cpp)
+OBJECTS = $(patsubst $(SOURCEDIR)/%.cpp, $(BUILDDIR)/%.o, $(SOURCES))
+CUDA_SOURCES = $(wildcard $(CUDA_SOURCEDIR)/*.cu)
+CUDA_OBJECTS = $(patsubst $(CUDA_SOURCEDIR)/%.cu, $(BUILDDIR)/%.cu_o, $(CUDA_SOURCES))
 
-# include and lib dirs (esp for cuda)
-INC_PATH := 
-LIB_PATH := 
-GLLIB_PATH := 
+all: dir $(TARGET)
 
-# flags
-COMMONFLAGS = -m64 
-CPPFLAGS = -O3 -std=c++11 -g -Wall -Wno-unused-variable
-LINKFLAGS += $(COMMONFLAGS) 
+dir:
+	mkdir -p $(BUILDDIR) lib
 
-# libs
-#LIBS = -lcudart 					# cuda libs 		-lcutil_x86_64 -lshrutil_x86_64
-GLLIBS = -lGL -lglut -lGLU -lGLEW 				# openGL libs       -lGL -lGLEW  #-lX11 -lXi -lXmu 		
-LIBS = 	  	# additional libs
+$(TARGET): $(OBJECTS) $(CUDA_OBJECTS)
+	g++ -shared $(LIBPATH) $(LDFLAGS) -o $(OUTLIBPATH)/$(TARGET).so $(OBJECTS) $(CUDA_OBJECTS) $(LIBS) $(CUDA_LIBS)
 
-# files
-OBJECTS = $(patsubst src/%.cpp, build/%.o, $(CCFILES))
+$(OBJECTS): $(BUILDDIR)/%.o : $(SOURCEDIR)/%.cpp
+	g++ -c $(CPPFLAGS) $(INCPATH) $< -o $@ 
 
-# common dependencies	
-COM_DEP = 
+$(CUDA_OBJECTS): $(BUILDDIR)/%.cu_o : $(CUDA_SOURCEDIR)/%.cu
+	nvcc -c $(CUDAFLAGS) $(INCPATH) $< -o $@ 
 
-all: dir $(TARGET)	
-
-dir: 
-	mkdir -p lib build
-
-$(TARGET): $(OBJECTS) 
-	g++ -o $(TARGET) $(LIB_PATH) $(GLLIB_PATH) $(OBJECTS) $(LIBS) $(GLLIBS)
-
-
-$(OBJECTS): build/%.o : src/%.cpp
-	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
-
-clean:
-	rm -f $(TARGET) build/*.o 
+install:
+	cp $(OUTLIBPATH)/$(TARGET).so.$(VERSION) $(INSTALLDIR)
 	
-re: clean all
+clean:
+	rm -f $(BUILDDIR)/*.o $(BUILDDIR)/*.cu_o $(OUTLIBPATH)/$(TARGET)*
 
-# ------------------------------------------------------------------------------
+
+
+
+## MAKEFILE FOR CUDA
+
+##-------------------------------------------------------------------------------
+## executable name
+#TARGET := 1
+
+## files
+#CCFILES  :=  $(wildcard src/*.cpp) 
+
+## ------------------------------------------------------------------------------
+
+## paths
+##CUDA_INSTALL_PATH ?= /usr/local/cuda#-5.0
+
+## compilers
+
+## include and lib dirs (esp for cuda)
+#INC_PATH := 
+#LIB_PATH := 
+#GLLIB_PATH := 
+
+## flags
+#COMMONFLAGS = -m64 
+#CPPFLAGS = -O3 -std=c++11 -g -Wall -Wno-unused-variable
+#LINKFLAGS += $(COMMONFLAGS) 
+
+## libs
+##LIBS = -lcudart 					# cuda libs 		-lcutil_x86_64 -lshrutil_x86_64
+#GLLIBS = -lGL -lglut -lGLU -lGLEW 				# openGL libs       -lGL -lGLEW  #-lX11 -lXi -lXmu 		
+#LIBS = 	  	# additional libs
+
+## files
+#OBJECTS = $(patsubst src/%.cpp, build/%.o, $(CCFILES))
+
+## common dependencies	
+#COM_DEP = 
+
+#all: dir $(TARGET)	
+
+#dir: 
+#	mkdir -p lib build
+
+#$(TARGET): $(OBJECTS) 
+#	g++ -o $(TARGET) $(LIB_PATH) $(GLLIB_PATH) $(OBJECTS) $(LIBS) $(GLLIBS)
+
+
+#$(OBJECTS): build/%.o : src/%.cpp
+#	g++ -c $(CPPFLAGS) $(INC_PATH) $< -o $@ 
+
+#clean:
+#	rm -f $(TARGET) build/*.o 
+#	
+#re: clean all
+
+## ------------------------------------------------------------------------------
 
 
 
