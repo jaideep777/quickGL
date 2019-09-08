@@ -24,8 +24,8 @@ Camera2D::Camera2D(float x0, float xf, float y0, float yf, float scale) : Camera
 //	int w1 = fmin(window_width, int(window_height*aspectRatio));
 //	int h1 = fmin(window_height, int(w1/aspectRatio));
 //	w1 = h1*aspectRatio;
-	tx = -(x0+xf)/2; ty = -(y0+yf)/2;
-	scale = min(xf-x0, yf-y0);
+	sc = min(1/(xf-x0), 1/(yf-y0));
+	tx = -(x0+xf)/2*sc; ty = -(y0+yf)/2*sc;
 	
 //	projection0 = projection = glm::ortho(glm::radians(90.0f), float() / , 0.1f, 1000.0f);
 	onResize(window_width, window_height);
@@ -45,8 +45,8 @@ void Camera2D::onResize(int w, int h){
 		
 //	float viewport_aspect_ratio = w/h;
 	
-	float dx = float(w - w1)/2*1*aspectRatio/w1;
-	float dy = float(h - h1)/2*1/h1;
+	float dx = float(w - w1)/2*1*aspectRatio/w1/2;
+	float dy = float(h - h1)/2*1/h1/2;
 	
 	cout << "dx dy = " << dx << " " << dy << endl;
 //	view = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, -100.0f) );
