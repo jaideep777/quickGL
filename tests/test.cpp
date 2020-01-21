@@ -4,6 +4,8 @@
 #include "../include/quickgl.h"
 using namespace std;
 
+// To Compile:
+// g++ -o 1 -L../lib test.cpp -lquickgl -lglut
 
 int main(int argc, char** argv){
 
