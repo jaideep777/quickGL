@@ -24,6 +24,9 @@ using namespace std;
 GLuint loadShader(string filename, GLenum shader_type){
 	cout << "Loading shader from " << filename << endl;
 	ifstream fin(filename.c_str());
+	
+	// FIXME: assert(fin);
+	
 	string c((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
 	const char * glsl_src = c.c_str();
 
@@ -175,8 +178,8 @@ void Shape::applyTexture(float * uvs, unsigned char * pixels, int w, int h){
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels); // After reading one row of texels, pointer advances to next 4 byte boundary. Therefore ALWAYS use 4byte colour types. 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	CHECK_GL_ERROR();
 

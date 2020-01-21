@@ -119,7 +119,7 @@ void Palette::print(){
 vector <float> Palette::mapValues(float* v, int nval, int stride, int offset, float vmin, float vmax){
 	vector <float> cols(4*nval);
 	
-	float min_val = v[0], max_val = v[0];
+	float min_val = v[offset], max_val = v[offset];
 //	double mean = v[0];
 	for (int i=1; i < nval; ++i){
 		min_val = min(min_val, v[stride*i+offset]);
@@ -160,7 +160,7 @@ vector <float> Palette::mapValues(float* v, int nval, int stride, int offset, fl
 vector <unsigned char> Palette::mapValues_byte(float* v, int nval, int stride, int offset, float vmin, float vmax){
 	vector <unsigned char> cols(4*nval);
 	
-	float min_val = v[0], max_val = v[0];
+	float min_val = v[offset], max_val = v[offset];
 //	double mean = v[0];
 	for (int i=1; i < nval; ++i){
 		min_val = min(min_val, v[stride*i+offset]);

@@ -168,19 +168,16 @@ int main(int argc, char** argv){
 	float uvscm[] = {0,0,   1,0,   1,1,   0,1   };
 	int elecm[] = {0,1,2,2,3,0};
 	vector<float> vals(10*10);
-	for (int i=0; i<vals.size(); ++i) vals[i] = i;
+	for (unsigned int i=0; i<vals.size(); ++i) vals[i] = i;
 	Palette palcm(1000);
 	palcm.createRainbow(); 
 	vector <unsigned char> colscm = palcm.mapValues_byte(vals.data(), 100);
-	unsigned char texcm[] = {
-	  0, 0,255,255, 	0, 255, 0,255,
-	  255,0,0,255,    255,255,255,255
-	};
+
 	Shape cm(4, GL_TRIANGLES);
 	cm.setVertices(poscm);	
 	cm.setElements(elecm, 6);
 	cm.applyTexture(uvscm, colscm.data(), 10,10);	
-	cm.setTextureFilters(GL_NEAREST, GL_NEAREST);
+//	cm.setTextureFilters(GL_LINEAR, GL_LINEAR);
 //	cm.autoExtent();
 	
 
