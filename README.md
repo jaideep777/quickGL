@@ -44,7 +44,10 @@ closeQuickGL();
 
 ## Compilation
 
-Include the contents of the QuickGL `src` and `include` folders in your respective project folders. Compile each file into an object file and link with the objects of your project.   
+Include the contents of the QuickGL `src` and `include` folders in your respective project folders. Compile each file into an object file and link with the objects of your project. 
+
+To compile as a shared library, edit the paths in Makefile and perform `make`.
+
 
 ## Extending QuickGL for more functionality
 
