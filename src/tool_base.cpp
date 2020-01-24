@@ -82,6 +82,16 @@ void Tool::captureClick(int button, int state, int x, int y){
 }
 
 
+void Tool::onKeyPress(unsigned char key, int x, int y){
+	cout << key << " captured by Tool at: " << x << " " << y << endl;
+}
+
+
+void Tool::onSpecialKeyPress(int key, int x, int y){
+	cout << key << " (special) captured by Tool at: " << x << " " << y << endl;
+}
+
+
 void Tool::onClick(int button, int state, int x, int y){
 	captureClick(button, state, x,y);		
 }

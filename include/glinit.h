@@ -27,6 +27,10 @@ void onClick(int button, int state, int x, int y);
 
 void onMouseMove(int x, int y);
 
+void onKeyPress(unsigned char key, int x, int y);
+
+void onSpecialKeyPress(int key, int x, int y);
+
 
 #endif
 

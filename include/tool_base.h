@@ -54,6 +54,9 @@ class Tool{
 
 	virtual void onClick(int button, int state, int x, int y);
 	virtual void onMouseMove(int x, int y);
+	virtual void onKeyPress(unsigned char key, int x, int y);
+	virtual void onSpecialKeyPress(int key, int x, int y);
+
 };
 
 

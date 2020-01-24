@@ -73,6 +73,14 @@ void onMouseMove(int x, int y){
 	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
 }
 
+void onKeyPress(unsigned char key, int x, int y){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onKeyPress(key, x, y);
+}
+
+void onSpecialKeyPress(int key, int x, int y){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onSpecialKeyPress(key, x, y);
+}
+
 
 void initQuickGL(int argc, char** argv){
 
@@ -100,9 +108,12 @@ void initQuickGL(int argc, char** argv){
 
 	glutDisplayFunc(onDisplay);
 	glutReshapeFunc(onResize);
+
 	glutMouseFunc(onClick);
 	glutMotionFunc(onMouseMove);
-	
+	glutKeyboardFunc(onKeyPress);
+	glutSpecialFunc(onSpecialKeyPress);	
+
 }
 
 
