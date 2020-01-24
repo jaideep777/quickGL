@@ -155,8 +155,8 @@ int main(int argc, char** argv){
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST 2D Camera ~~~~~~~~~~~~~~~~~~~
-	Camera2D cam2D(-1, 3, -1, 1, 0.9);
-	cam2D.activate();
+//	Camera2D cam2D(-1, 3, -1, 1, 0.9);
+//	cam2D.activate();
 
 	float pos2d[] = {0,0,0, 2,0,0, 2,0,0, 2,1,0, 2,1,0, 0,1,0, 0,1,0, 0,0,0};
 	Shape s2d(8, GL_LINES);

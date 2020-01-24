@@ -47,6 +47,11 @@ void onDisplay(void){
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (Shape::activeCamera == NULL) {
+		cout << "WARNING: No camera is active. Cannot draw." << endl;
+		return;
+	}
+
 	for (auto it : Shape::allShapes) it->render();	
 
 	glutSwapBuffers();
@@ -55,7 +60,7 @@ void onDisplay(void){
 
 void onResize(int w, int h){
 //	width = w; height = h;
-	Shape::activeCamera->onResize(w,h); //glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	if (Shape::activeCamera) Shape::activeCamera->onResize(w,h); //glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
 

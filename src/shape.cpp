@@ -223,10 +223,7 @@ void Shape::setPointSize(float psize){
 
 void Shape::render(){
 	
-	if (activeCamera == NULL) {
-		cout << "WARNING: No camera is active. Cannot draw." << endl;
-		return;
-	}
+	if (!activeCamera) return;
 	
 	glUseProgram(program);
 	setShaderVariable("transform", activeCamera->matrix()*world*model);
