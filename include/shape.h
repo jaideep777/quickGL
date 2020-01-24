@@ -15,10 +15,11 @@ class Shape{
 	public:
 	int nVertices;
 	int nElements;
+	bool visible;
 		
 	bool useColor, useTexture, useElements;
 	bool useTransparency;
-		
+	
 	GLuint vbo, cbo, ebo, tbo;
 
 	GLuint tex;

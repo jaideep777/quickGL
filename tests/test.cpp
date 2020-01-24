@@ -179,6 +179,7 @@ int main(int argc, char** argv){
 	cm.setVertices(poscm);	
 	cm.setElements(elecm, 6);
 	cm.applyTexture(uvscm, colscm.data(), 10,10);	
+	cm.visible = false;
 //	cm.setTextureFilters(GL_LINEAR, GL_LINEAR);
 //	cm.autoExtent();
 	

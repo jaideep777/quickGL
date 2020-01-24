@@ -47,6 +47,7 @@ Shape::Shape(int nverts, GLenum mode){
 	renderMode = mode;
 	useColor = useTexture = useElements = false;
 	model = world = glm::mat4(1.f);
+	visible = true;
 	
 	vertexShader = loadShader("shaders/shader_vertex.glsl", GL_VERTEX_SHADER);
 	fragmentShader = loadShader("shaders/shader_fragment.glsl", GL_FRAGMENT_SHADER);
@@ -224,6 +225,7 @@ void Shape::setPointSize(float psize){
 void Shape::render(){
 	
 	if (!activeCamera) return;
+	if (!visible)     return;
 	
 	glUseProgram(program);
 	setShaderVariable("transform", activeCamera->matrix()*world*model);
