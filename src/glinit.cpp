@@ -4,7 +4,7 @@
 
 #include "../include/shape.h"
 #include "../include/camera.h"
-#include "../include/tool_base.h"
+//#include "../include/tool_base.h"
 
 using namespace std;
 
@@ -60,12 +60,12 @@ void onResize(int w, int h){
 
 
 void onClick(int button, int state, int x, int y){
-	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
+//	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
 }
 
 
 void onMouseMove(int x, int y){
-	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
+//	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
 }
 
 

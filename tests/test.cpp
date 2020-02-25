@@ -11,7 +11,7 @@ int main(int argc, char** argv){
 	initQuickGL(argc, argv);
 	
 	// Create a Controller to rotate/pan/zoom the view with mouse/touch
-	CameraController c;
+//	CameraController c;
 
 	// Create a Camera
 	glm::vec3 pos(2.0f, 2.0f, 2.0f);
@@ -153,13 +153,13 @@ int main(int argc, char** argv){
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST 2D Camera ~~~~~~~~~~~~~~~~~~~
-	Camera2D cam2D(-1, 3, -1, 1, 0.9);
-	cam2D.activate();
+//	Camera2D cam2D(-1, 3, -1, 1, 0.9);
+//	cam2D.activate();
 
-	float pos2d[] = {0,0,0, 2,0,0, 2,0,0, 2,1,0, 2,1,0, 0,1,0, 0,1,0, 0,0,0};
-	Shape s2d(8, GL_LINES);
-	s2d.setVertices(pos2d);	
-	s2d.autoExtent();
+//	float pos2d[] = {0,0,0, 2,0,0, 2,0,0, 2,1,0, 2,1,0, 0,1,0, 0,1,0, 0,0,0};
+//	Shape s2d(8, GL_LINES);
+//	s2d.setVertices(pos2d);	
+//	s2d.autoExtent();
 	
 	
 	// ~~~~~~~~~~~~~~~~~~~~~~ COLORMAP TEST ~~~~~~~~~~~~~~~~~
