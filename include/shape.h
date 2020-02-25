@@ -1,12 +1,11 @@
 #ifndef QUICKGL_SHAPE_H_
 #define QUICKGL_SHAPE_H_
 
-#include <GL/glew.h>
-#include <GL/glut.h>
 #include <list>
 #include <string>
 
 #include <glm/glm.hpp>
+#include "../include/glinit.h"
 
 class Camera;
 

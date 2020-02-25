@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+
 #include "../include/quickgl.h"
 using namespace std;
 
@@ -185,14 +186,14 @@ int main(int argc, char** argv){
 	
 
 
+    while (windowIsOpen())
+    {
+		onDisplay();
+//		usleep(10000);
 
-//	for (int i=0; i<10000; ++i){  
-	glutMainLoop();
-//	usleep(100);
-//	}
+		glfwPollEvents();
+	}
 
-//	s.deleteTexture();
-//	delete s;
 	
 	closeQuickGL();
 
