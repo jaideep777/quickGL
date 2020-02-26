@@ -1,4 +1,5 @@
 #include  "../include/tool_base.h"
+#include  "../include/glinit.h"
 
 #include <algorithm>
 
@@ -42,9 +43,12 @@ void Tool::activate(){
 }
 
 
-void Tool::captureClick(int button, int state, int x, int y){
-	if (button == GLUT_LEFT_BUTTON){
-		if (state == GLUT_DOWN){
+void Tool::captureClick(int button, int state, int mods){
+	double x = 0, y=0;
+	glfwGetCursorPos(window, &x, &y);
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT){
+		if (state == GLFW_PRESS){
 			cout << "L Click captured by Tool at: " << x << " " << y << endl;
 			lClick = true;
 			x0 = x;
@@ -55,8 +59,8 @@ void Tool::captureClick(int button, int state, int x, int y){
 		} 
 	}
 
-	if (button == GLUT_MIDDLE_BUTTON){
-		if (state == GLUT_DOWN){
+	if (button == GLFW_MOUSE_BUTTON_MIDDLE){
+		if (state == GLFW_PRESS){
 			cout << "M Click captured by Tool at: " << x << " " << y << endl;
 			mClick = true;
 			x0 = x;
@@ -67,8 +71,8 @@ void Tool::captureClick(int button, int state, int x, int y){
 		} 
 	}
 
-	if (button == GLUT_RIGHT_BUTTON){
-		if (state == GLUT_DOWN){
+	if (button == GLFW_MOUSE_BUTTON_RIGHT){
+		if (state == GLFW_PRESS){
 			cout << "R Click captured by Tool at: " << x << " " << y << endl;
 			rClick = true;
 			x0 = x;
@@ -82,8 +86,8 @@ void Tool::captureClick(int button, int state, int x, int y){
 }
 
 
-void Tool::onClick(int button, int state, int x, int y){
-	captureClick(button, state, x,y);		
+void Tool::onClick(int button, int state, int mods){
+	captureClick(button, state, mods);		
 }
 
 
@@ -92,6 +96,9 @@ void Tool::onMouseMove(int x, int y){
 }
 
 
+void Tool::onScroll(double dx, double dy){
+
+}
 
 
 

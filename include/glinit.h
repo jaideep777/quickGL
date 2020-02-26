@@ -26,11 +26,11 @@ void closeQuickGL();
 
 void onDisplay(void);
 
-void onResize(int w, int h);
+/*void onResize(int w, int h);*/
 
-void onClick(int button, int state, int x, int y);
+/*void onClick(int button, int state, int x, int y);*/
 
-void onMouseMove(int x, int y);
+/*void onMouseMove(int x, int y);*/
 
 
 #endif

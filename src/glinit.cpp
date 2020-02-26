@@ -4,7 +4,7 @@
 
 #include "../include/shape.h"
 #include "../include/camera.h"
-//#include "../include/tool_base.h"
+#include "../include/tool_base.h"
 
 using namespace std;
 
@@ -81,15 +81,18 @@ void onResize(GLFWwindow* window, int w, int h){
 }
 
 
-void onClick(int button, int state, int x, int y){
-//	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
+void onClick(GLFWwindow* window, int button, int state, int mods){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, mods);
 }
 
 
-void onMouseMove(int x, int y){
-//	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
+void onMouseMove(GLFWwindow* window, double x, double y){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
 }
 
+void onScroll(GLFWwindow* window, double dx, double dy){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onScroll(dx, dy);
+}
 
 int initQuickGL(int argc, char** argv){
 
@@ -140,6 +143,9 @@ int initQuickGL(int argc, char** argv){
 
 	// callbacks
     glfwSetFramebufferSizeCallback(window, onResize);
+    glfwSetMouseButtonCallback(window, onClick);
+	glfwSetCursorPosCallback(window, onMouseMove);
+	glfwSetScrollCallback(window, onScroll);
 //	glutMouseFunc(onClick);
 //	glutMotionFunc(onMouseMove);
 	return 0;

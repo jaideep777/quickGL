@@ -3,8 +3,6 @@
 
 #include <list>
 #include <iostream>
-#include <GL/glew.h>
-#include <GL/glut.h>
 
 #include <glm/glm.hpp>
 #include "../include/shape.h"
@@ -50,10 +48,11 @@ class Tool{
 	virtual ~Tool();
 
 	void activate();
-	void captureClick(int button, int state, int x, int y);	
+	void captureClick(int button, int state, int mods);	
 
-	virtual void onClick(int button, int state, int x, int y);
+	virtual void onClick(int button, int state, int mods);
 	virtual void onMouseMove(int x, int y);
+	virtual void onScroll(double dx, double dy);
 };
 
 
