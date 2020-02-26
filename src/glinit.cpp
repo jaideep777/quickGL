@@ -26,8 +26,10 @@ string errorString(GLenum err){
 }
 
 // TODO: Should there be a GLInterface class that controls the globals? 
-//       e.g. It will store the active shapes list and active tools list? 
-// 		 Maybe not?
+//       e.g. It will store the active shapes list and active tools list, plus active window, active tool, active camera etc. 
+//            Can also separate input form processing
+// 		      Maybe not?
+//            Maybe yes!
 
 void checkGLError(const char * file, int line){
 	GLenum err;
