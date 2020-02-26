@@ -9,9 +9,21 @@
 using namespace std;
 
 GLuint vao;
-int width = 320;
-int height = 240;
+int width = 800;
+int height = 600;
 
+GLFWwindow* window = nullptr;
+
+string errorString(GLenum err){
+	if (err == GL_INVALID_ENUM) return "GL_INVALID_ENUM";
+	else if (err == GL_INVALID_VALUE) return "GL_INVALID_VALUE";
+	else if (err == GL_INVALID_OPERATION) return "GL_INVALID_OPERATION";
+	else if (err == GL_STACK_OVERFLOW) return "GL_STACK_OVERFLOW";
+	else if (err == GL_STACK_UNDERFLOW) return "GL_STACK_UNDERFLOW";
+	else if (err == GL_OUT_OF_MEMORY) return "GL_OUT_OF_MEMORY";
+	else return "NO ERROR"; 
+//	else if (err == GL_TABLE_TOO_LARGE) return "GL_TABLE_TOO_LARGE";	
+}
 
 // TODO: Should there be a GLInterface class that controls the globals? 
 //       e.g. It will store the active shapes list and active tools list? 
@@ -20,7 +32,7 @@ int height = 240;
 void checkGLError(const char * file, int line){
 	GLenum err;
 	while((err = glGetError()) != GL_NO_ERROR){
-		cout << file << ":" << line << "   Error: " << gluErrorString(err) << endl;
+		cout << file << ":" << line << "   Error: " << errorString(err) << endl;
 	}
 }
 
@@ -42,40 +54,79 @@ void printStatus(const char *step, GLuint context, GLuint status){
 }
 
 
+bool windowIsOpen(){
+	return !glfwWindowShouldClose(window);
+}
+
 void onDisplay(void){
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // render
+        // ------
+//        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	for (auto it : Shape::allShapes) it->render();	
+		for (auto it : Shape::allShapes) it->render();	
+ 
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
 
-	glutSwapBuffers();
 }
 
 
-void onResize(int w, int h){
+void onResize(GLFWwindow* window, int w, int h){
 //	width = w; height = h;
 	Shape::activeCamera->onResize(w,h); //glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 }
 
 
-void onClick(int button, int state, int x, int y){
-	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, x, y);
+void onClick(GLFWwindow* window, int button, int state, int mods){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onClick(button, state, mods);
 }
 
 
-void onMouseMove(int x, int y){
+void onMouseMove(GLFWwindow* window, double x, double y){
 	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onMouseMove(x, y);
 }
 
+void onScroll(GLFWwindow* window, double dx, double dy){
+	if (!Tool::activeTools.empty())	Tool::activeTools.front()->onScroll(dx, dy);
+}
 
-void initQuickGL(int argc, char** argv){
+int initQuickGL(int argc, char** argv){
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);	
-	glutInitWindowSize(width, height);
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glutCreateWindow("mini");
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+#endif
+
+    // glfw window creation
+    // --------------------
+    window = glfwCreateWindow(width, height, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
+    }
+
+    glfwMakeContextCurrent(window);
+
+	// gl3w initialization
+	// -------------------
+	if (gl3wInit()) {
+		printf("failed to initialize OpenGL\n");
+		return -1;
+	}
+
+
 
 
 	glEnable(GL_BLEND);
@@ -85,25 +136,26 @@ void initQuickGL(int argc, char** argv){
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
 
-	glewExperimental = GL_TRUE;
-	glewInit();
-
 	// BUFFERS etc
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
-	glutDisplayFunc(onDisplay);
-	glutReshapeFunc(onResize);
-	glutMouseFunc(onClick);
-	glutMotionFunc(onMouseMove);
-	
+	// callbacks
+    glfwSetFramebufferSizeCallback(window, onResize);
+    glfwSetMouseButtonCallback(window, onClick);
+	glfwSetCursorPosCallback(window, onMouseMove);
+	glfwSetScrollCallback(window, onScroll);
+//	glutMouseFunc(onClick);
+//	glutMotionFunc(onMouseMove);
+	return 0;
 }
 
 
 void closeQuickGL(){
 	glBindVertexArray(0);
 	glDeleteVertexArrays(1, &vao);
+	glfwTerminate();
 
 }
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 
+
 #include "../include/quickgl.h"
 using namespace std;
 
@@ -12,7 +13,8 @@ int main(int argc, char** argv){
 	
 	// Create a Controller to rotate/pan/zoom the view with mouse/touch
 	CameraController c;
-
+//	Tool t;
+	
 	// Create a Camera
 	glm::vec3 pos(2.0f, 2.0f, 2.0f);
 	glm::vec3 lookat(0.5f, 0.5f, 0.0f);
@@ -153,46 +155,46 @@ int main(int argc, char** argv){
 
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ TEST 2D Camera ~~~~~~~~~~~~~~~~~~~
-	Camera2D cam2D(-1, 3, -1, 1, 0.9);
-	cam2D.activate();
+//	Camera2D cam2D(-1, 3, -1, 1, 0.9);
+//	cam2D.activate();
 
-	float pos2d[] = {0,0,0, 2,0,0, 2,0,0, 2,1,0, 2,1,0, 0,1,0, 0,1,0, 0,0,0};
-	Shape s2d(8, GL_LINES);
-	s2d.setVertices(pos2d);	
-	s2d.autoExtent();
+//	float pos2d[] = {0,0,0, 2,0,0, 2,0,0, 2,1,0, 2,1,0, 0,1,0, 0,1,0, 0,0,0};
+//	Shape s2d(8, GL_LINES);
+//	s2d.setVertices(pos2d);	
+//	s2d.autoExtent();
 	
 	
-	// ~~~~~~~~~~~~~~~~~~~~~~ COLORMAP TEST ~~~~~~~~~~~~~~~~~
+//	// ~~~~~~~~~~~~~~~~~~~~~~ COLORMAP TEST ~~~~~~~~~~~~~~~~~
+//	
+//	float poscm[] = {0,0,2, 2,0,2, 2,2,2, 0,2,2};
+//	float uvscm[] = {0,0,   1,0,   1,1,   0,1   };
+//	int elecm[] = {0,1,2,2,3,0};
+//	vector<float> vals(10*10);
+//	for (int i=0; i<vals.size(); ++i) vals[i] = i;
+//	Palette palcm(1000);
+//	palcm.createRainbow(); 
+//	vector <unsigned char> colscm = palcm.mapValues_byte(vals.data(), 100);
+//	unsigned char texcm[] = {
+//	  0, 0,255,255, 	0, 255, 0,255,
+//	  255,0,0,255,    255,255,255,255
+//	};
+//	Shape cm(4, GL_TRIANGLES);
+//	cm.setVertices(poscm);	
+//	cm.setElements(elecm, 6);
+//	cm.applyTexture(uvscm, colscm.data(), 10,10);	
+//	cm.setTextureFilters(GL_NEAREST, GL_NEAREST);
+////	cm.autoExtent();
 	
-	float poscm[] = {0,0,2, 2,0,2, 2,2,2, 0,2,2};
-	float uvscm[] = {0,0,   1,0,   1,1,   0,1   };
-	int elecm[] = {0,1,2,2,3,0};
-	vector<float> vals(10*10);
-	for (int i=0; i<vals.size(); ++i) vals[i] = i;
-	Palette palcm(1000);
-	palcm.createRainbow(); 
-	vector <unsigned char> colscm = palcm.mapValues_byte(vals.data(), 100);
-	unsigned char texcm[] = {
-	  0, 0,255,255, 	0, 255, 0,255,
-	  255,0,0,255,    255,255,255,255
-	};
-	Shape cm(4, GL_TRIANGLES);
-	cm.setVertices(poscm);	
-	cm.setElements(elecm, 6);
-	cm.applyTexture(uvscm, colscm.data(), 10,10);	
-	cm.setTextureFilters(GL_NEAREST, GL_NEAREST);
-//	cm.autoExtent();
-	
 
 
+    while (windowIsOpen())
+    {
+		onDisplay();
+//		usleep(10000);
 
-//	for (int i=0; i<10000; ++i){  
-	glutMainLoop();
-//	usleep(100);
-//	}
+		glfwWaitEvents();
+	}
 
-//	s.deleteTexture();
-//	delete s;
 	
 	closeQuickGL();
 

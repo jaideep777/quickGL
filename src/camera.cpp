@@ -9,6 +9,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "../include/shape.h"
+#include "../include/glinit.h"
 
 using namespace std;
 
@@ -43,7 +44,10 @@ Camera::Camera(glm::vec3 _position, glm::vec3 _lookingAt, glm::vec3 _Up){
 		
 	transform();
 	
-	projection0 = projection = glm::perspective(glm::radians(90.0f), float(glutGet(GLUT_WINDOW_WIDTH)) / glutGet(GLUT_WINDOW_HEIGHT), 0.1f, 1000.0f);
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+
+	projection0 = projection = glm::perspective(glm::radians(90.0f), float(width) / height, 0.1f, 1000.0f);
 }
 
 
