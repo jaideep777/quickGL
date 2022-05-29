@@ -15,10 +15,10 @@ class Shape{
 	int nVertices;
 	int nElements;
 		
-	bool useColor, useTexture, useElements;
+	bool useColor, useTexture, useElements, useNormals;
 	bool useTransparency;
 		
-	GLuint vbo, cbo, ebo, tbo;
+	GLuint vbo, cbo, ebo, tbo, nbo;
 
 	GLuint tex;
 	
@@ -29,6 +29,8 @@ class Shape{
 	glm::mat4 model, world;		// transformations
 	glm::vec3 bbox0, bbox1;		// bounding box of original shape, in untransformed space
 	
+	glm::vec4 color; // if uniform color is requested
+	
 	public:
 	static std::list<Shape*> allShapes;	// a list of all existing shapes 
 	static Camera* activeCamera;
@@ -38,12 +40,15 @@ class Shape{
 	virtual ~Shape();
 
 	void setVertices(float * verts);
+	void setNormals(float * normals);
 	void setColors(float * cols);
 	void setElements(int * ele, int nelements);
 	void applyTexture(float * uvs, unsigned char * image, int w, int h);
-	void autoExtent();
+	virtual void autoExtent();
 
 	void setShaderVariable(std::string s, glm::mat4 f);
+	void setShaderVariable(std::string s, glm::mat3 f);
+	void setShaderVariable(std::string s, float f);
 	void setPointSize(float psize);
 	void setTextureFilters(GLint minFilter, GLint magFilter);
 	

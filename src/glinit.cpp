@@ -137,7 +137,7 @@ int initQuickGL(int argc, char** argv){
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
-
+    
 	// BUFFERS etc
 
 	glGenVertexArrays(1, &vao);

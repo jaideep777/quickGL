@@ -37,13 +37,14 @@ GLuint loadShader(string filename, GLenum shader_type){
 
 
 list<Shape*> Shape::allShapes;
-Camera* Shape::activeCamera = NULL;
+Camera* Shape::activeCamera = nullptr;
 
 Shape::Shape(int nverts, GLenum mode){
 	nVertices = nverts;
 	renderMode = mode;
-	useColor = useTexture = useElements = false;
+	useColor = useTexture = useElements = useNormals = false;
 	model = world = glm::mat4(1.f);
+	color = glm::vec4(1,1,1,1);
 	
 	vertexShader = loadShader("shaders/shader_vertex.glsl", GL_VERTEX_SHADER);
 	fragmentShader = loadShader("shaders/shader_fragment.glsl", GL_FRAGMENT_SHADER);
@@ -59,6 +60,7 @@ Shape::Shape(int nverts, GLenum mode){
 	glGenBuffers(1, &cbo);
 	glGenBuffers(1, &ebo);
 	glGenBuffers(1, &tbo);
+	glGenBuffers(1, &nbo);
 	CHECK_GL_ERROR();
 	
 	glUseProgram(program);
@@ -100,6 +102,9 @@ Shape::~Shape(){
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glDeleteBuffers(1, &tbo);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glDeleteBuffers(1, &nbo);
 
 	glDetachShader(program, vertexShader);
 	glDetachShader(program, fragmentShader);
@@ -146,6 +151,12 @@ void Shape::setColors(float * cols){
 	useColor = true;
 	glBindBuffer(GL_ARRAY_BUFFER, cbo);
 	glBufferData(GL_ARRAY_BUFFER, 4*nVertices*sizeof(float), cols, GL_DYNAMIC_DRAW);
+}
+
+void Shape::setNormals(float * normals){
+	useNormals = true;
+	glBindBuffer(GL_ARRAY_BUFFER, nbo);
+	glBufferData(GL_ARRAY_BUFFER, 3*nVertices*sizeof(float), normals, GL_DYNAMIC_DRAW);
 }
 
 void Shape::setElements(int * ele, int nelements){
@@ -211,6 +222,16 @@ void Shape::setShaderVariable(string s, glm::mat4 f){
 	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(f));
 }
 
+void Shape::setShaderVariable(string s, glm::mat3 f){
+	GLuint loc = glGetUniformLocation(program, s.c_str());
+	glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(f));
+}
+
+void Shape::setShaderVariable(string s, float f){
+	GLuint loc = glGetUniformLocation(program, s.c_str());
+	glUniform1f(loc, f);
+}
+
 void Shape::setPointSize(float psize){
 	GLuint loc = glGetUniformLocation(program, "pointsize");
 	glUniform1f(loc, psize);
@@ -226,8 +247,17 @@ void Shape::render(){
 	}
 	
 	glUseProgram(program);
-	setShaderVariable("transform", activeCamera->matrix()*world*model);
+	setShaderVariable("PVWM", activeCamera->matrix()*world*model);
+	setShaderVariable("WM", world*model);
+	CHECK_GL_ERROR();
+	
+	if (useNormals) setShaderVariable("normalMatrix", glm::transpose(glm::inverse(glm::mat3(world*model))) );
+	else            setShaderVariable("normalMatrix", glm::mat3(1.f) );
+	CHECK_GL_ERROR();
 
+	if (useTexture) setShaderVariable("mixer", 0);
+	CHECK_GL_ERROR();
+	
 	GLint pos_loc = glGetAttribLocation(program, "in_pos");
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -241,10 +271,21 @@ void Shape::render(){
 		glEnableVertexAttribArray(col_loc);
 	}
 	else{
-		glVertexAttrib4f(col_loc, 1, 1, 1, 1);
+		glVertexAttrib4f(col_loc, color.r, color.g, color.b, color.a);
 	}
 	CHECK_GL_ERROR();
-	
+
+	GLint n_loc = glGetAttribLocation(program, "in_normal");
+	if (useNormals){
+		glBindBuffer(GL_ARRAY_BUFFER, nbo);
+		glVertexAttribPointer(n_loc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(n_loc);
+	}
+	else{
+		glVertexAttrib3f(n_loc, 0, 0, 1); // default normal is [0,0,1]
+	}
+	CHECK_GL_ERROR();
+
 	GLint uv_loc = glGetAttribLocation(program, "in_UV");
 	if (useTexture){
 		glBindBuffer(GL_ARRAY_BUFFER, tbo);
@@ -258,11 +299,12 @@ void Shape::render(){
 	glBindTexture(GL_TEXTURE_2D, tex);
 
 	CHECK_GL_ERROR();
-	
+		
 	if (useElements) glDrawElements(renderMode, nElements, GL_UNSIGNED_INT, (void *)0);
 	else             glDrawArrays(renderMode, 0, nVertices);
 
 	if (useTexture) glDisableVertexAttribArray(uv_loc);
+	if (useNormals) glDisableVertexAttribArray(n_loc);
 	if (useColor)   glDisableVertexAttribArray(col_loc);
 	glDisableVertexAttribArray(pos_loc);
 	CHECK_GL_ERROR();
