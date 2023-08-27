@@ -2,7 +2,7 @@
 #define QUICKGL_GL_INIT_H_
 
 
-#include <GL/gl3w.h>
+#include "GL/gl3w.h"
 #include <GLFW/glfw3.h>
 
 #include <string>
